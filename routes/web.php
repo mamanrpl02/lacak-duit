@@ -5,6 +5,7 @@ use Laravel\Socialite\Socialite;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
 
 
 
@@ -43,5 +44,14 @@ Route::get('/auth/google/callback', function () {
 
     return redirect('/dashboard');
 });
+
+
+
+
+Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
+    ->middleware('auth')
+    ->name('logout');
+
+
 
 require __DIR__ . '/auth.php';

@@ -5,6 +5,7 @@ use Laravel\Socialite\Socialite;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 
 
@@ -43,6 +44,31 @@ Route::get('/auth/google/callback', function () {
     Auth::login($user);
 
     return redirect('/dashboard');
+});
+
+
+
+// Middleware auth agar hanya user login yang bisa akses dashboard
+Route::middleware(['auth'])->group(function () {
+    Route::get('/dashboard', function () {
+        return view('dashboard');
+    })->name('dashboard');
+
+    Route::get('/transaksi', function () {
+        return view('transaksi');
+    })->name('transaksi');
+
+    Route::get('/dompet', function () {
+        return view('dompet');
+    })->name('dompet');
+
+    Route::get('/kategori', function () {
+        return view('kategori');
+    })->name('kategori');
+
+    Route::get('/feedback', [FeedbackController::class, 'create'])->name('feedback.create');
+    Route::post('/feedback', [FeedbackController::class, 'store'])->name('feedback.store');
+    
 });
 
 

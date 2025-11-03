@@ -13,7 +13,7 @@ class User extends Authenticatable
 
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable ;
+    use HasFactory, Notifiable;
 
 
 
@@ -30,6 +30,12 @@ class User extends Authenticatable
         'google_token',
         'google_refresh_token',
     ];
+
+    public function feedback()
+    {
+        return $this->hasMany(Feedback::class);
+    }
+
 
     /**
      * The attributes that should be hidden for serialization.

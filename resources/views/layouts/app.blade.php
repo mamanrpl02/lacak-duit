@@ -1,22 +1,34 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dashboard Modern Responsive</title>
-    <!-- Scripts -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    <title>{{ config('app.name', 'Laravel') }}</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+
+    <!-- Tailwind & JS dari Vite -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" />
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <style>
         .transition-all {
             transition: all 0.3s ease-in-out;
         }
     </style>
-
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" />
 </head>
 
-<body class="bg-gray-50 min-h-screen flex text-gray-800">
+<body class="bg-gray-50 min-h-screen flex text-gray-800 antialiased">
+
     <!-- Overlay (untuk mobile) -->
     <div id="overlay" class="fixed inset-0 bg-black bg-opacity-30 z-40 hidden"></div>
 
@@ -25,48 +37,72 @@
         class="bg-white shadow-md w-64 p-4 flex flex-col justify-between fixed h-screen transition-all duration-300 z-50 -translate-x-full md:translate-x-0">
         <div>
             <!-- Logo -->
-            <div class="flex items-center gap-2 mb-8">
-                <div class="bg-blue-600 text-white p-2 rounded-lg text-xl font-bold">
-                    F
-                </div>
-                <h1 id="logoText" class="text-lg font-semibold transition-all">
-                    Fathwork
-                </h1>
+            <div class="flex align-middle items-center gap-2 mb-8">
+                {{-- <div class="bg-blue-600 text-white p-2 rounded-lg text-xl font-bold">F</div> --}}
+                <img class="w-8" src="{{ asset('assets/images/logo-noname.png') }}" alt="Logo">
+
+                <h1 id="logoText" class="text-lg font-semibold transition-all">Lacak Duit</h1>
             </div>
 
             <!-- Menu -->
-            <nav class="flex flex-col gap-2">
-                <a href="index.html" class="flex items-center gap-3 p-3 rounded-lg hover:bg-blue-50 transition group">
-                    <i class="bi bi-grid-1x2 w-5 h-5 text-blue-600 flex-shrink-0"></i>
+            <nav class="flex flex-col gap-2 ">
+                <a href="{{ route('dashboard') }}"
+                    class="flex items-center gap-3 p-3 rounded-lg hover:bg-blue-50 transition group">
+                    <i class="bi bi-grid-1x2 text-blue-600"></i>
                     <span class="text-sm group-hover:font-medium transition-all menu-text">Dashboard</span>
                 </a>
-                <a href="transaksi.html"
+
+                <a href="{{ route('transaksi') }}"
                     class="flex items-center gap-3 p-3 rounded-lg hover:bg-blue-50 transition group">
-                    <i class="bi bi-arrow-left-right w-5 h-5 text-blue-600 flex-shrink-0"></i>
+                    <i class="bi bi-arrow-left-right text-blue-600"></i>
                     <span class="text-sm group-hover:font-medium transition-all menu-text">Transaksi</span>
                 </a>
-                <a href="dompet.html" class="flex items-center gap-3 p-3 rounded-lg hover:bg-blue-50 transition group">
-                    <i class="bi bi-wallet2 w-5 h-5 text-blue-600 flex-shrink-0"></i>
 
+                <a href="{{ route('dompet') }}"
+                    class="flex items-center gap-3 p-3 rounded-lg hover:bg-blue-50 transition group">
+                    <i class="bi bi-wallet2 text-blue-600"></i>
                     <span class="text-sm group-hover:font-medium transition-all menu-text">Dompet</span>
                 </a>
-                <a href="kategori.html"
+
+                <a href="{{ route('kategori') }}"
                     class="flex items-center gap-3 p-3 rounded-lg hover:bg-blue-50 transition group">
-                    <i class="bi bi-tags w-5 h-5 text-blue-600 flex-shrink-0"></i>
+                    <i class="bi bi-tags text-blue-600"></i>
                     <span class="text-sm group-hover:font-medium transition-all menu-text">Kategori</span>
                 </a>
+
+                <a href="#" onclick="showComingSoon()"
+                    class="flex items-center gap-3 p-3 rounded-lg cursor-not-allowed opacity-60 hover:bg-gray-100 transition group">
+                    <i class="bi bi-bell text-gray-400"></i>
+                    <span class="text-sm group-hover:font-medium transition-all menu-text">Pengingat Rekap
+                        Transaksi</span>
+                    <span
+                        class="ml-auto bg-yellow-100 text-yellow-700 text-xs font-medium px-2 py-0.5 rounded">Segera</span>
+                </a>
+
             </nav>
         </div>
 
-        <!-- Watermark -->
-        <div class="text-center text-xs text-gray-400 watermark">
-            <p>© 2025 Fathwork</p>
-            <p>by Mamman</p>
+        <!-- Footer / Watermark -->
+        <div class="text-center text-xs text-gray-400 watermark space-y-1">
+            <p>© 2025 LacakDuit</p>
+            <p>
+                by
+                <a class="underline text-sky-400" href="http://manzweb.my.id" target="_blank" rel="noopener noreferrer">
+                    manzweb.my.id
+                </a>
+            </p>
+
+            <!-- Link ke halaman feedback -->
+            <a href="{{ route('feedback.create') }}" class="text-sky-400 underline hover:text-sky-500">
+                Kirim Feedback 💬
+            </a>
+
         </div>
     </aside>
 
     <!-- Main Content -->
     <div id="mainContent" class="flex-1 transition-all duration-300 ml-0 md:ml-64">
+
         <!-- Topbar -->
         <header id="topbar"
             class="flex items-center justify-between bg-white shadow-sm px-6 py-3 sticky top-0 z-30 transition-all duration-300">
@@ -102,7 +138,6 @@
                     <a href="#" class="block px-3 py-2 hover:bg-gray-100 rounded">Profil</a>
                     <a href="#" class="block px-3 py-2 hover:bg-gray-100 rounded">Pengaturan</a>
                     <hr class="my-1" />
-
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit"
@@ -110,35 +145,17 @@
                             Logout
                         </button>
                     </form>
-
                 </div>
             </div>
         </header>
 
-        <!-- Content -->
+        <!-- Halaman dinamis -->
         <main class="p-6">
-            <h2 class="text-2xl font-semibold mb-4">Selamat datang, Mamman 👋</h2>
-            <p class="text-gray-600">
-                Sekarang sidebar responsif dan animasinya smooth banget.
-            </p>
-
-            <div class="grid md:grid-cols-3 gap-6 mt-8">
-                <div class="bg-white rounded-2xl shadow hover:shadow-lg transition p-6">
-                    <h3 class="font-semibold text-gray-700 mb-2">Jumlah Siswa</h3>
-                    <p class="text-3xl font-bold text-blue-600">120</p>
-                </div>
-                <div class="bg-white rounded-2xl shadow hover:shadow-lg transition p-6">
-                    <h3 class="font-semibold text-gray-700 mb-2">Tugas Aktif</h3>
-                    <p class="text-3xl font-bold text-green-600">8</p>
-                </div>
-                <div class="bg-white rounded-2xl shadow hover:shadow-lg transition p-6">
-                    <h3 class="font-semibold text-gray-700 mb-2">Laporan Masuk</h3>
-                    <p class="text-3xl font-bold text-purple-600">15</p>
-                </div>
-            </div>
+            {{ $slot }}
         </main>
     </div>
 
+    <!-- Script Sidebar -->
     <script>
         const sidebar = document.getElementById("sidebar");
         const mainContent = document.getElementById("mainContent");
@@ -152,26 +169,14 @@
 
         toggleSidebar.addEventListener("click", () => {
             if (window.innerWidth >= 768) {
-                // Desktop collapse
                 collapsed = !collapsed;
                 sidebar.classList.toggle("w-64");
                 sidebar.classList.toggle("w-20");
-                document
-                    .querySelectorAll(".menu-text")
-                    .forEach((e) => e.classList.toggle("hidden"));
+                document.querySelectorAll(".menu-text").forEach((e) => e.classList.toggle("hidden"));
                 document.querySelector(".watermark").classList.toggle("hidden");
                 document.getElementById("logoText").classList.toggle("hidden");
-
-                // Geser konten dan topbar juga
-                if (collapsed) {
-                    mainContent.style.marginLeft = "5rem";
-                    topbar.style.marginLeft = "0";
-                } else {
-                    mainContent.style.marginLeft = "16rem";
-                    topbar.style.marginLeft = "0";
-                }
+                mainContent.style.marginLeft = collapsed ? "5rem" : "16rem";
             } else {
-                // Mobile overlay
                 sidebar.classList.remove("-translate-x-full");
                 overlay.classList.remove("hidden");
             }
@@ -182,33 +187,37 @@
             overlay.classList.add("hidden");
         });
 
-        profileBtn.addEventListener("click", () => {
-            dropdownMenu.classList.toggle("hidden");
-        });
+        profileBtn.addEventListener("click", () => dropdownMenu.classList.toggle("hidden"));
 
         document.addEventListener("click", (e) => {
-            if (
-                !profileBtn.contains(e.target) &&
-                !dropdownMenu.contains(e.target)
-            ) {
-                dropdownMenu.classList.add("hidden");
-            }
+            if (!profileBtn.contains(e.target) && !dropdownMenu.contains(e.target)) dropdownMenu.classList.add(
+                "hidden");
         });
 
-        // Responsif: reset ketika resize
         window.addEventListener("resize", () => {
             if (window.innerWidth < 768) {
                 sidebar.classList.add("-translate-x-full");
                 overlay.classList.add("hidden");
                 mainContent.style.marginLeft = "0";
-                topbar.style.marginLeft = "0";
             } else {
                 sidebar.classList.remove("-translate-x-full");
                 overlay.classList.add("hidden");
                 mainContent.style.marginLeft = collapsed ? "5rem" : "16rem";
-                topbar.style.marginLeft = collapsed ? "5rem" : "16rem";
             }
         });
+    </script>
+
+    {{-- sweet allert --}}
+    <script>
+        function showComingSoon() {
+            Swal.fire({
+                title: 'Fitur Segera Hadir 🚧',
+                text: 'Fitur pengingat rekap transaksi sedang dalam pengembangan.',
+                icon: 'info',
+                confirmButtonText: 'Oke, Saya Tunggu 😁',
+                confirmButtonColor: '#2563eb',
+            });
+        }
     </script>
 </body>
 

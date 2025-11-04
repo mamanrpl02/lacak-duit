@@ -25,7 +25,9 @@
                         <label class="block text-sm font-medium text-gray-700">Nama Kategori</label>
                         <input type="text" wire:model.defer="nama_kategori"
                             class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
-                        @error('nama_kategori') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        @error('nama_kategori')
+                            <span class="text-red-500 text-sm">{{ $message }}</span>
+                        @enderror
                     </div>
 
                     <div>
@@ -37,13 +39,14 @@
                             <option value="Keluar">Keluar</option>
                             <option value="Withdraw">Withdraw</option>
                         </select>
-                        @error('type') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        @error('type')
+                            <span class="text-red-500 text-sm">{{ $message }}</span>
+                        @enderror
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Keterangan</label>
-                        <textarea wire:model.defer="keterangan"
-                            class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"></textarea>
+                        <textarea wire:model.defer="keterangan" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"></textarea>
                     </div>
 
                     <div>
@@ -70,7 +73,9 @@
                             @endif
                         @endif
 
-                        @error('gambar_icon') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        @error('gambar_icon')
+                            <span class="text-red-500 text-sm">{{ $message }}</span>
+                        @enderror
                     </div>
 
                     <div class="text-end">
@@ -78,8 +83,7 @@
                             class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 mr-2">
                             Batal
                         </button>
-                        <button type="submit"
-                            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
                             Simpan
                         </button>
                     </div>
@@ -91,6 +95,22 @@
     <!-- Table -->
     <section class="mt-6">
         <div class="overflow-x-auto bg-white shadow rounded-2xl p-4">
+
+            <!-- Header dan Search -->
+            <div class="m-4 flex flex-col md:flex-row justify-between items-center gap-3">
+                <div class="text-center md:text-left">
+                    <h1 class="text-xl font-bold text-gray-800">Daftar Kategori</h1>
+                    <p class="text-sm text-gray-500">
+                        Atur Kategori untuk transaksi Anda di sini.
+                    </p>
+                </div>
+                <div class="relative w-full md:w-1/3">
+                    <input type="text" id="searchInput" placeholder="Cari Kategori..."
+                        class="w-full border rounded-lg px-4 py-2 pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    <i class="bi bi-search absolute left-3 top-2.5 text-gray-400"></i>
+                </div>
+            </div>
+
             <table class="min-w-full text-sm text-left text-gray-700">
                 <thead class="border-b text-gray-600 uppercase text-xs">
                     <tr>
@@ -109,7 +129,8 @@
                             <td class="px-4 py-3">{{ $kategori->keterangan ?? '-' }}</td>
                             <td class="px-4 py-3">
                                 @if ($kategori->gambar_icon)
-                                    <img src="{{ asset('storage/' . $kategori->gambar_icon) }}" class="w-8 h-8 rounded">
+                                    <img src="{{ asset('storage/' . $kategori->gambar_icon) }}"
+                                        class="w-8 h-8 rounded">
                                 @else
                                     <span class="text-gray-400">Tidak ada</span>
                                 @endif
@@ -119,8 +140,7 @@
                                     class="px-3 py-1 bg-sky-500 text-white rounded-lg hover:bg-sky-600">
                                     Edit
                                 </button>
-                                <button
-                                    onclick="confirmDelete({{ $kategori->id }})"
+                                <button onclick="confirmDelete({{ $kategori->id }})"
                                     class="px-3 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600">
                                     Hapus
                                 </button>
@@ -138,33 +158,35 @@
 </div>
 
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-    function confirmDelete(id) {
-        Swal.fire({
-            title: 'Yakin ingin menghapus?',
-            text: "Data kategori akan dihapus permanen!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Ya, hapus!',
-            cancelButtonText: 'Batal'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                Livewire.dispatch('deleteKategori', { id: id });
-            }
-        });
-    }
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function confirmDelete(id) {
+            Swal.fire({
+                title: 'Yakin ingin menghapus?',
+                text: "Data kategori akan dihapus permanen!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Livewire.dispatch('deleteKategori', {
+                        id: id
+                    });
+                }
+            });
+        }
 
-    Livewire.on('successAlert', (message) => {
-        Swal.fire({
-            icon: 'success',
-            title: 'Berhasil!',
-            text: message,
-            timer: 2000,
-            showConfirmButton: false
+        Livewire.on('successAlert', (message) => {
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: message,
+                timer: 2000,
+                showConfirmButton: false
+            });
         });
-    });
-</script>
+    </script>
 @endpush

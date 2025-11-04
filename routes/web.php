@@ -47,7 +47,10 @@ Route::middleware(['auth'])->group(function () {
     Route::view('/transaksi', 'transaksi')->name('transaksi');
 
     // Dompet
-    Route::view('/dompet', 'dompet')->name('dompet');
+    Route::get('/dompet', function () {
+        return view('dompet');
+    })->name('dompet');
+
 
     // Feedback
     Route::get('/feedback', [FeedbackController::class, 'create'])->name('feedback.create');

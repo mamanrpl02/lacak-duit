@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('kategoris', function (Blueprint $table) {
             $table->id();
             $table->string('nama_kategori');
+            $table->enum('type', ['Masuk', 'Keluar', 'Withdraw']);
             $table->text('keterangan')->nullable();
             $table->string('gambar_icon')->nullable();
             $table->timestamps();

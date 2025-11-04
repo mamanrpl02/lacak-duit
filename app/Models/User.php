@@ -36,6 +36,12 @@ class User extends Authenticatable
         return $this->hasMany(Feedback::class);
     }
 
+    public function transaksis()
+    {
+        return $this->hasMany(Transaksi::class);
+    }
+
+
 
     /**
      * The attributes that should be hidden for serialization.

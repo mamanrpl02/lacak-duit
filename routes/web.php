@@ -44,7 +44,10 @@ Route::middleware(['auth'])->group(function () {
     Route::view('/dashboard', 'dashboard')->name('dashboard');
 
     // Transaksi
-    Route::view('/transaksi', 'transaksi')->name('transaksi');
+    Route::get('/transaksi', function () {
+        return view('transaksi');
+    })->name('transaksi');
+
 
     // Dompet
     Route::get('/dompet', function () {

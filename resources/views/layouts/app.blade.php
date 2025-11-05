@@ -38,14 +38,12 @@
         <div>
             <!-- Logo -->
             <div class="flex align-middle items-center gap-2 mb-8">
-                {{-- <div class="bg-blue-600 text-white p-2 rounded-lg text-xl font-bold">F</div> --}}
                 <img class="w-8" src="{{ asset('assets/images/logo-noname.png') }}" alt="Logo">
-
                 <h1 id="logoText" class="text-lg font-semibold transition-all">Lacak Duit</h1>
             </div>
 
             <!-- Menu -->
-            <nav class="flex flex-col gap-2 ">
+            <nav class="flex flex-col gap-2">
                 <a href="{{ route('dashboard') }}"
                     class="flex items-center gap-3 p-3 rounded-lg hover:bg-blue-50 transition group">
                     <i class="bi bi-grid-1x2 text-blue-600"></i>
@@ -76,13 +74,19 @@
                     <span class="text-sm group-hover:font-medium transition-all menu-text">Pengingat Rekap
                         Transaksi</span>
                     <span
-                        class="ml-auto bg-yellow-100 text-yellow-700 text-xs font-medium px-2 py-0.5 rounded">Segera</span>
+                        class="ml-auto bg-yellow-100 text-yellow-700 text-xs font-medium px-2 py-0.5 rounded transition-all menu-text">Segera</span>
                 </a>
 
+                <!-- 🔹 Menu Feedback (baru, dipindahkan ke bawah menu Segera) -->
+                <a href="{{ route('feedback.create') }}"
+                    class="flex items-center gap-3 p-3 rounded-lg hover:bg-blue-50 transition group">
+                    <i class="bi bi-chat-dots text-blue-600"></i>
+                    <span class="text-sm group-hover:font-medium transition-all menu-text">Kirim Feedback</span>
+                </a>
             </nav>
         </div>
 
-        <!-- Footer / Watermark -->
+        <!-- Footer -->
         <div class="text-center text-xs text-gray-400 watermark space-y-1">
             <p>© 2025 LacakDuit</p>
             <p>
@@ -92,13 +96,11 @@
                 </a>
             </p>
 
-            <!-- Link ke halaman feedback -->
-            <a href="{{ route('feedback.create') }}" class="text-sky-400 underline hover:text-sky-500">
-                Kirim Feedback 💬
-            </a>
-
+            <!-- 🔹 Versi Aplikasi -->
+            <p class="text-gray-300 mt-2">v1.0.0</p>
         </div>
     </aside>
+
 
     <!-- Main Content -->
     <div id="mainContent" class="flex-1 transition-all duration-300 ml-0 md:ml-64">
@@ -207,18 +209,18 @@
         });
     </script>
 
-    {{-- sweet allert --}}
+
     <script>
         function showComingSoon() {
             Swal.fire({
-                title: 'Fitur Segera Hadir 🚧',
-                text: 'Fitur pengingat rekap transaksi sedang dalam pengembangan.',
                 icon: 'info',
-                confirmButtonText: 'Oke, Saya Tunggu 😁',
-                confirmButtonColor: '#2563eb',
+                title: 'Segera Hadir!',
+                text: 'Fitur pengingat rekap transaksi akan segera tersedia.',
+                confirmButtonColor: '#3085d6'
             });
         }
     </script>
+
 
     @stack('scripts')
     @livewireScripts

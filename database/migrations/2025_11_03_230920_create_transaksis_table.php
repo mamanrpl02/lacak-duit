@@ -17,7 +17,9 @@ return new class extends Migration
             $table->integer('nominal');
             $table->enum('status', ['Masuk', 'Keluar', 'Withdraw']);
             $table->foreignId('kategori_id')->constrained('kategoris')->onDelete('cascade');
-            $table->foreignId('dompet_id')->constrained('dompets')->onDelete('cascade');
+            // $table->foreignId('dompet_id')->constrained('dompets')->onDelete('cascade');
+            $table->foreignId('dompet_asal_id')->nullable()->constrained('dompets')->onDelete('cascade');
+            $table->foreignId('dompet_tujuan_id')->nullable()->constrained('dompets')->onDelete('cascade');
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->timestamps();
         });

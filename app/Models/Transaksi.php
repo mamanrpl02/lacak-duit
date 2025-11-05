@@ -16,7 +16,8 @@ class Transaksi extends Model
         'nominal',
         'status',
         'kategori_id',
-        'dompet_id',
+        'dompet_asal_id',
+        'dompet_tujuan_id',
         'user_id',
     ];
 
@@ -25,13 +26,20 @@ class Transaksi extends Model
         return $this->belongsTo(Kategori::class);
     }
 
-    public function dompet()
+    public function dompetAsal()
     {
-        return $this->belongsTo(Dompet::class);
+        return $this->belongsTo(Dompet::class, 'dompet_asal_id');
     }
 
-    public function siswa()
+    public function dompetTujuan()
+    {
+        return $this->belongsTo(Dompet::class, 'dompet_tujuan_id');
+    }
+
+
+    public function user()
     {
         return $this->belongsTo(User::class);
     }
+    
 }

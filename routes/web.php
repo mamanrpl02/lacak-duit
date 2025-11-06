@@ -1,13 +1,14 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Route;
+use Laravel\Socialite\Facades\Socialite;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\KategoriController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
-use App\Models\User;
-use Laravel\Socialite\Facades\Socialite;
 
 // Halaman utama
 Route::view('/', 'welcome');
@@ -41,7 +42,8 @@ Route::get('/auth/google/callback', function () {
 Route::middleware(['auth'])->group(function () {
 
     // Dashboard
-    Route::view('/dashboard', 'dashboard')->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
 
     // Transaksi
     Route::get('/transaksi', function () {

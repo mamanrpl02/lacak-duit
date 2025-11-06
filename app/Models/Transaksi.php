@@ -14,6 +14,7 @@ class Transaksi extends Model
     protected $fillable = [
         'keterangan',
         'nominal',
+        'tanggal',
         'status',
         'kategori_id',
         'dompet_asal_id',
@@ -41,5 +42,4 @@ class Transaksi extends Model
     {
         return $this->belongsTo(User::class);
     }
-    
 }

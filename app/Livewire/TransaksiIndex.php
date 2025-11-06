@@ -13,7 +13,7 @@ class TransaksiIndex extends Component
 {
     use WithPagination;
 
-    public $keterangan, $nominal, $status, $kategori_id, $dompet_asal_id, $dompet_tujuan_id;
+    public $keterangan, $nominal, $tanggal, $status, $kategori_id, $dompet_asal_id, $dompet_tujuan_id;
     public $isModalOpen = false, $isEdit = false, $transaksiId = null;
     public $filteredKategoris = [];
 
@@ -68,6 +68,7 @@ class TransaksiIndex extends Component
         $this->validate([
             'keterangan' => 'required',
             'nominal' => 'required|numeric',
+            'tanggal' => 'required|date',
             'status' => 'required',
             'kategori_id' => 'required',
         ]);
@@ -88,6 +89,7 @@ class TransaksiIndex extends Component
             [
                 'keterangan' => $this->keterangan,
                 'nominal' => $this->nominal,
+                'tanggal' => $this->tanggal,
                 'status' => $this->status,
                 'kategori_id' => $this->kategori_id,
                 'dompet_asal_id' => $this->dompet_asal_id,
@@ -109,6 +111,7 @@ class TransaksiIndex extends Component
         $this->transaksiId = $id;
         $this->keterangan = $transaksi->keterangan;
         $this->nominal = $transaksi->nominal;
+        $this->tanggal = $transaksi->tanggal ? date('Y-m-d', strtotime($transaksi->tanggal)) : null;
         $this->status = $transaksi->status;
         $this->kategori_id = $transaksi->kategori_id;
         $this->dompet_asal_id = $transaksi->dompet_asal_id;
@@ -139,6 +142,7 @@ class TransaksiIndex extends Component
     {
         $this->keterangan = '';
         $this->nominal = '';
+        $this->tanggal = '';
         $this->status = '';
         $this->kategori_id = '';
         $this->dompet_asal_id = '';

@@ -19,4 +19,13 @@ class Dompet extends Model
     {
         return $this->hasMany(Transaksi::class);
     }
+
+    public function transaksiAsal()
+    {
+        return $this->hasMany(Transaksi::class, 'dompet_asal_id');
+    }
+    public function transaksiTujuan()
+    {
+        return $this->hasMany(Transaksi::class, 'dompet_tujuan_id');
+    }
 }

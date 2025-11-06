@@ -1,8 +1,8 @@
 <div class="p-6">
     <div class="flex justify-between items-center mb-4">
         <h1 class="text-xl font-semibold text-gray-700">Daftar Transaksi</h1>
-        <button wire:click="openModal"
-            class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">+ Tambah</button>
+        <button wire:click="openModal" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">+
+            Tambah</button>
     </div>
 
     <div class="bg-white shadow rounded-xl mt-2 p-4 overflow-x-auto">
@@ -11,6 +11,7 @@
                 <tr>
                     <th class="py-2 px-4">Keterangan</th>
                     <th class="py-2 px-4">Nominal</th>
+                    <th class="py-2 px-4">Tanggal</th>
                     <th class="py-2 px-4">Status</th>
                     <th class="py-2 px-4">Kategori</th>
                     <th class="py-2 px-4">Dompet</th>
@@ -36,6 +37,8 @@
                                 {{ $t->status }}
                             </span>
                         </td>
+
+                        <td class="px-4 py-2">{{ \Carbon\Carbon::parse($t->tanggal)->format('d/m/Y') ?? '-' }}</td>
 
                         <td class="px-4 py-2">{{ $t->kategori->nama_kategori ?? '-' }}</td>
 
@@ -86,14 +89,27 @@
                     <div class="mb-3">
                         <label class="block text-sm">Keterangan</label>
                         <input type="text" wire:model="keterangan" class="w-full border rounded p-2">
-                        @error('keterangan') <p class="text-red-500 text-xs">{{ $message }}</p> @enderror
+                        @error('keterangan')
+                            <p class="text-red-500 text-xs">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     <div class="mb-3">
                         <label class="block text-sm">Nominal</label>
                         <input type="number" wire:model="nominal" class="w-full border rounded p-2">
-                        @error('nominal') <p class="text-red-500 text-xs">{{ $message }}</p> @enderror
+                        @error('nominal')
+                            <p class="text-red-500 text-xs">{{ $message }}</p>
+                        @enderror
                     </div>
+
+                    <div class="mb-3">
+                        <label class="block text-sm">Tanggal</label>
+                        <input type="date" wire:model="tanggal" class="w-full border rounded p-2">
+                        @error('tanggal')
+                            <p class="text-red-500 text-xs">{{ $message }}</p>
+                        @enderror
+                    </div>
+
 
                     <div class="mb-3">
                         <label class="block text-sm">Status</label>
@@ -103,7 +119,9 @@
                             <option value="Keluar">Keluar</option>
                             <option value="Withdraw">Withdraw</option>
                         </select>
-                        @error('status') <p class="text-red-500 text-xs">{{ $message }}</p> @enderror
+                        @error('status')
+                            <p class="text-red-500 text-xs">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     <div class="mb-3">
@@ -114,7 +132,9 @@
                                 <option value="{{ $k->id }}">{{ $k->nama_kategori }}</option>
                             @endforeach
                         </select>
-                        @error('kategori_id') <p class="text-red-500 text-xs">{{ $message }}</p> @enderror
+                        @error('kategori_id')
+                            <p class="text-red-500 text-xs">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     @if ($status === 'Withdraw')
@@ -126,7 +146,9 @@
                                     <option value="{{ $d->id }}">{{ $d->nama_dompet }}</option>
                                 @endforeach
                             </select>
-                            @error('dompet_asal_id') <p class="text-red-500 text-xs">{{ $message }}</p> @enderror
+                            @error('dompet_asal_id')
+                                <p class="text-red-500 text-xs">{{ $message }}</p>
+                            @enderror
                         </div>
 
                         <div class="mb-3">
@@ -137,7 +159,9 @@
                                     <option value="{{ $d->id }}">{{ $d->nama_dompet }}</option>
                                 @endforeach
                             </select>
-                            @error('dompet_tujuan_id') <p class="text-red-500 text-xs">{{ $message }}</p> @enderror
+                            @error('dompet_tujuan_id')
+                                <p class="text-red-500 text-xs">{{ $message }}</p>
+                            @enderror
                         </div>
                     @else
                         <div class="mb-3">
@@ -148,15 +172,16 @@
                                     <option value="{{ $d->id }}">{{ $d->nama_dompet }}</option>
                                 @endforeach
                             </select>
-                            @error('dompet_asal_id') <p class="text-red-500 text-xs">{{ $message }}</p> @enderror
+                            @error('dompet_asal_id')
+                                <p class="text-red-500 text-xs">{{ $message }}</p>
+                            @enderror
                         </div>
                     @endif
 
                     <div class="flex justify-end mt-4 space-x-2">
                         <button type="button" wire:click="closeModal"
                             class="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Batal</button>
-                        <button type="submit"
-                            class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+                        <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
                             {{ $isEdit ? 'Update' : 'Simpan' }}
                         </button>
                     </div>
@@ -167,7 +192,9 @@
 
     <script>
         document.addEventListener('livewire:init', () => {
-            Livewire.on('swal:confirmDelete', ({ id }) => {
+            Livewire.on('swal:confirmDelete', ({
+                id
+            }) => {
                 Swal.fire({
                     title: 'Yakin ingin menghapus?',
                     text: "Data ini akan dihapus permanen!",
@@ -177,12 +204,16 @@
                     cancelButtonText: 'Batal',
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        Livewire.dispatch('deleteConfirmed', { id: id });
+                        Livewire.dispatch('deleteConfirmed', {
+                            id: id
+                        });
                     }
                 });
             });
 
-            Livewire.on('swal:success', ({ message }) => {
+            Livewire.on('swal:success', ({
+                message
+            }) => {
                 Swal.fire({
                     icon: 'success',
                     title: 'Berhasil',

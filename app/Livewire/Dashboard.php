@@ -5,81 +5,84 @@ namespace App\Livewire;
 use Livewire\Component;
 use App\Models\Transaksi;
 use App\Models\Dompet;
-use Carbon\Carbon;
+use App\Models\Kategori;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class Dashboard extends Component
 {
-    public $dompet = 'semua';
     public $tanggal_dari;
     public $tanggal_sampai;
+    public $dompet_id;
+
+    public $pemasukan = 0;
+    public $pengeluaran = 0;
+    public $saldo = 0;
+    public $chartData = [];
+    public $kategoriChart = [];
 
     public function mount()
     {
-        $this->tanggal_dari = Carbon::now()->startOfMonth()->format('Y-m-d');
-        $this->tanggal_sampai = Carbon::now()->endOfMonth()->format('Y-m-d');
+        $this->tanggal_dari = now()->startOfMonth()->format('Y-m-d');
+        $this->tanggal_sampai = now()->endOfMonth()->format('Y-m-d');
+        $this->loadData();
     }
 
-    public function render()
+    public function updated($property)
     {
-        $query = Transaksi::with(['kategori', 'user'])
-            ->where('user_id', Auth::id())
-            ->whereBetween('created_at', [$this->tanggal_dari, $this->tanggal_sampai]);
+        $this->loadData();
+        $this->dispatch('refreshCharts', $this->chartData, $this->kategoriChart);
+    }
 
-        if ($this->dompet !== 'semua') {
+    private function loadData()
+    {
+        $query = Transaksi::where('user_id', Auth::id())
+            ->whereBetween('tanggal', [$this->tanggal_dari, $this->tanggal_sampai]);
+
+        // Filter dompet (asal / tujuan)
+        if ($this->dompet_id) {
             $query->where(function ($q) {
-                $q->where('dompet_asal_id', $this->dompet)
-                    ->orWhere('dompet_tujuan_id', $this->dompet);
+                $q->where('dompet_asal_id', $this->dompet_id)
+                  ->orWhere('dompet_tujuan_id', $this->dompet_id);
             });
         }
 
         $transaksis = $query->get();
 
-        $saldo = $this->hitungSaldo($transaksis);
-        $pemasukan = $transaksis->where('status', 'Masuk')->sum('nominal');
-        $pengeluaran = $transaksis->where('status', 'Keluar')->sum('nominal');
+        // Hitung total pemasukan & pengeluaran
+        $this->pemasukan = $transaksis->where('status', 'Masuk')->sum('nominal');
+        $this->pengeluaran = $transaksis->where('status', 'Keluar')->sum('nominal');
+        $this->saldo = $this->pemasukan - $this->pengeluaran;
 
-        $chartData = $this->getChartData($transaksis);
-        $kategoriChart = $this->getKategoriChart($transaksis);
-        $dompets = Dompet::all();
+        // === Chart Bulanan ===
+        $grouped = $transaksis->groupBy(function ($item) {
+            return Carbon::parse($item->tanggal)->format('M Y');
+        });
 
-        return view('livewire.dashboard', [
-            'saldo' => $saldo,
-            'pemasukan' => $pemasukan,
-            'pengeluaran' => $pengeluaran,
-            'chartData' => $chartData,
-            'kategoriChart' => $kategoriChart,
-            'dompets' => $dompets,
-        ]);
-    }
+        $this->chartData = [
+            'labels' => $grouped->keys()->toArray(),
+            'pemasukan' => $grouped->map(fn($g) => $g->where('status', 'Masuk')->sum('nominal'))->values()->toArray(),
+            'pengeluaran' => $grouped->map(fn($g) => $g->where('status', 'Keluar')->sum('nominal'))->values()->toArray(),
+        ];
 
-    private function hitungSaldo($transaksis)
-    {
-        $masuk = $transaksis->where('status', 'Masuk')->sum('nominal');
-        $keluar = $transaksis->where('status', 'Keluar')->sum('nominal');
-        return $masuk - $keluar;
-    }
-
-    private function getChartData($transaksis)
-    {
-        $bulan = collect(range(1, 12))->map(fn($m) => Carbon::create()->month($m)->shortMonthName);
-        $pemasukan = [];
-        $pengeluaran = [];
-
-        foreach (range(1, 12) as $m) {
-            $pemasukan[] = $transaksis->where('status', 'Masuk')->filter(fn($t) => Carbon::parse($t->created_at)->month == $m)->sum('nominal');
-            $pengeluaran[] = $transaksis->where('status', 'Keluar')->filter(fn($t) => Carbon::parse($t->created_at)->month == $m)->sum('nominal');
-        }
-
-        return [
-            'labels' => $bulan,
-            'pemasukan' => $pemasukan,
-            'pengeluaran' => $pengeluaran,
+        // === Chart Kategori ===
+        $kategoriGroup = $transaksis->groupBy('kategori_id');
+        $this->kategoriChart = [
+            'labels' => $kategoriGroup->keys()->map(fn($id) =>
+                optional(Kategori::find($id))->nama_kategori ?? 'Tanpa Kategori'
+            )->toArray(),
+            'data' => $kategoriGroup->map(fn($g) => $g->sum('nominal'))->values()->toArray(),
         ];
     }
 
-    private function getKategoriChart($transaksis)
+    public function render()
     {
-        return $transaksis->groupBy('kategori.nama_kategori')->map(fn($items) => $items->sum('nominal'));
+        $dompetList = Dompet::where('user_id', Auth::id())->pluck('nama_dompet', 'id');
+
+        return view('livewire.dashboard', [
+            'chartData' => $this->chartData,
+            'kategoriChart' => $this->kategoriChart,
+            'dompetList' => $dompetList,
+        ]);
     }
 }

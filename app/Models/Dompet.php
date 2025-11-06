@@ -12,6 +12,7 @@ class Dompet extends Model
 
     protected $fillable = [
         'nama_dompet',
+        'user_id',
         'keterangan',
     ];
 

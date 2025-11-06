@@ -19,7 +19,7 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach ($transaksis as $t)
+                @forelse ($transaksis as $t)
                     <tr class="border-b hover:bg-gray-50">
                         <td class="px-4 py-2">{{ $t->keterangan }}</td>
                         <td class="px-4 py-2">Rp{{ number_format($t->nominal, 0, ',', '.') }}</td>
@@ -70,7 +70,14 @@
                                 class="px-3 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600">Hapus</button>
                         </td>
                     </tr>
-                @endforeach
+                @empty
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-gray-500">
+                            Belum ada data transaksi.
+                        </td>
+                    </tr>
+                @endforelse
+
             </tbody>
         </table>
 

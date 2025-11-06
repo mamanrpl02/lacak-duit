@@ -22,6 +22,20 @@ class Transaksi extends Model
         'user_id',
     ];
 
+    protected $casts = [
+        'tanggal' => 'date',
+    ];
+
+    protected static function booted()
+    {
+        static::creating(function ($transaksi) {
+            if (empty($transaksi->tanggal)) {
+                $transaksi->tanggal = now();
+            }
+        });
+    }
+
+
     public function kategori()
     {
         return $this->belongsTo(Kategori::class);

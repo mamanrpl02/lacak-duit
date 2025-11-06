@@ -9,6 +9,9 @@ use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Livewire\Dashboard;
+
+
 
 // Halaman utama
 Route::view('/', 'welcome');
@@ -38,12 +41,16 @@ Route::get('/auth/google/callback', function () {
     return redirect()->route('dashboard');
 });
 
+
+
 // Semua halaman di bawah hanya bisa diakses oleh user login
 Route::middleware(['auth'])->group(function () {
 
-    // Dashboard
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+    // Dashboard
+    Route::get('/dashboard', function () {
+        return view('dashboard'); // memanggil blade yang berisi <x-app-layout><livewire:dashboard/></x-app-layout>
+    })->middleware('auth')->name('dashboard');
 
     // Transaksi
     Route::get('/transaksi', function () {

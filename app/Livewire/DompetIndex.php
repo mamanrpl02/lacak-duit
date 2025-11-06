@@ -5,6 +5,7 @@ namespace App\Livewire;
 use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\Dompet;
+use Illuminate\Support\Facades\Auth;
 
 class DompetIndex extends Component
 {
@@ -21,7 +22,10 @@ class DompetIndex extends Component
     public function render()
     {
         return view('livewire.dompet-index', [
-            'dompets' => Dompet::latest()->paginate(10),
+            // ✅ hanya tampilkan dompet milik user yang sedang login
+            'dompets' => Dompet::where('user_id', Auth::id())
+                ->latest()
+                ->paginate(10),
         ]);
     }
 
@@ -45,6 +49,7 @@ class DompetIndex extends Component
             [
                 'nama_dompet' => $this->nama_dompet,
                 'keterangan' => $this->keterangan,
+                'user_id' => Auth::id(), // ✅ simpan user id
             ]
         );
 
@@ -54,16 +59,20 @@ class DompetIndex extends Component
 
     public function edit($id)
     {
-        $dompet = Dompet::findOrFail($id);
-        $this->dompet_id = $id;
+        $dompet = Dompet::where('user_id', Auth::id())->findOrFail($id);
+
+        $this->dompet_id = $dompet->id;
         $this->nama_dompet = $dompet->nama_dompet;
         $this->keterangan = $dompet->keterangan;
+
         $this->openModal();
     }
 
     public function delete($id)
     {
-        Dompet::findOrFail($id)->delete();
+        $dompet = Dompet::where('user_id', Auth::id())->findOrFail($id);
+        $dompet->delete();
+
         session()->flash('success', 'Data berhasil dihapus.');
     }
 }

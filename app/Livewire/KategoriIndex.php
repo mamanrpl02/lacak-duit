@@ -6,6 +6,7 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\WithFileUploads;
 use App\Models\Kategori;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class KategoriIndex extends Component
@@ -29,7 +30,10 @@ class KategoriIndex extends Component
     public function render()
     {
         return view('livewire.kategori-index', [
-            'kategoris' => Kategori::latest()->paginate(10),
+            // ✅ hanya tampilkan kategori milik user login
+            'kategoris' => Kategori::where('user_id', Auth::id())
+                ->latest()
+                ->paginate(10),
         ]);
     }
 
@@ -42,7 +46,8 @@ class KategoriIndex extends Component
 
     public function edit($id)
     {
-        $kategori = Kategori::findOrFail($id);
+        $kategori = Kategori::where('user_id', Auth::id())->findOrFail($id);
+
         $this->kategori_id = $kategori->id;
         $this->nama_kategori = $kategori->nama_kategori;
         $this->type = $kategori->type;
@@ -74,6 +79,7 @@ class KategoriIndex extends Component
             'type' => $this->type,
             'keterangan' => $this->keterangan,
             'gambar_icon' => $path,
+            'user_id' => Auth::id(), // ✅ simpan user id
         ]);
 
         $this->closeModal();
@@ -89,7 +95,7 @@ class KategoriIndex extends Component
             return;
         }
 
-        $kategori = Kategori::findOrFail($this->kategori_id);
+        $kategori = Kategori::where('user_id', Auth::id())->findOrFail($this->kategori_id);
 
         if ($this->gambar_icon) {
             if ($kategori->gambar_icon && Storage::disk('public')->exists($kategori->gambar_icon)) {
@@ -113,10 +119,12 @@ class KategoriIndex extends Component
 
     public function delete($id)
     {
-        $kategori = Kategori::findOrFail($id);
+        $kategori = Kategori::where('user_id', Auth::id())->findOrFail($id);
+
         if ($kategori->gambar_icon && Storage::disk('public')->exists($kategori->gambar_icon)) {
             Storage::disk('public')->delete($kategori->gambar_icon);
         }
+
         $kategori->delete();
 
         $this->dispatch('successAlert', 'Kategori berhasil dihapus.');

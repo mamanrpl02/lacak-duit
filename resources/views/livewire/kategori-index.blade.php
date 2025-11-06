@@ -1,4 +1,4 @@
-<div>
+<div class="p-6">
     <section>
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-xl font-semibold text-gray-800">Kelola Kategori</h2>
@@ -122,7 +122,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($kategoris as $kategori)
+                    @forelse ($kategoris as $kategori)
                         <tr class="border-b hover:bg-gray-50 transition">
                             <td class="px-4 py-3">{{ $kategori->nama_kategori }}</td>
                             <td class="px-4 py-3">{{ $kategori->type }}</td>
@@ -146,7 +146,12 @@
                                 </button>
                             </td>
                         </tr>
-                    @endforeach
+                    @empty
+                        <tr>
+                            <td colspan="5" class="text-center py-4 text-gray-500">Belum ada data kategori.</td>
+                        </tr>
+                    @endforelse
+
                 </tbody>
             </table>
 

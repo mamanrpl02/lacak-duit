@@ -29,4 +29,18 @@ class Dompet extends Model
     {
         return $this->hasMany(Transaksi::class, 'dompet_tujuan_id');
     }
+
+    public function getSaldoAttribute()
+    {
+        // Saldo masuk
+        $masuk = $this->transaksiAsal()->where('status', 'Masuk')->sum('nominal');
+        // Saldo keluar
+        $keluar = $this->transaksiAsal()->where('status', 'Keluar')->sum('nominal');
+        // Withdraw keluar
+        $withdrawKeluar = $this->transaksiAsal()->where('status', 'Withdraw')->sum('nominal');
+        // Withdraw masuk
+        $withdrawMasuk = $this->transaksiTujuan()->where('status', 'Withdraw')->sum('nominal');
+
+        return $masuk - $keluar - $withdrawKeluar + $withdrawMasuk;
+    }
 }

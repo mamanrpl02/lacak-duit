@@ -7,10 +7,10 @@
             <p class="text-gray-500 text-sm">Pantau arus pemasukan dan pengeluaran dengan mudah</p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
-            <input type="date" wire:model="tanggal_dari" class="border rounded-lg px-3 py-2 text-sm">
+            <input type="date" wire:model.lazy="tanggal_dari" class="border rounded-lg px-3 py-2 text-sm">
             <span class="text-gray-500">sampai</span>
-            <input type="date" wire:model="tanggal_sampai" class="border rounded-lg px-3 py-2 text-sm">
-            <select wire:model="dompet_id" class="border rounded-lg px-3 py-2 text-sm">
+            <input type="date" wire:model.lazy="tanggal_sampai" class="border rounded-lg px-3 py-2 text-sm">
+            <select wire:model.lazy="dompet_id" class="border rounded-lg px-3 py-2 text-sm">
                 <option value="">Semua Dompet</option>
                 @foreach ($dompetList as $id => $nama)
                     <option value="{{ $id }}">{{ $nama }}</option>
@@ -21,6 +21,13 @@
 
     <!-- Ringkasan -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+        <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 shadow-sm">
+            <p class="text-sm text-blue-700 font-semibold mb-1">Saldo Saat Ini</p>
+            <h2 class="text-2xl font-bold text-blue-800">Rp{{ number_format($saldo, 0, ',', '.') }}</h2>
+            <p class="text-xs text-gray-500 mt-1">Selisih antara pemasukan dan pengeluaran</p>
+        </div>
+
         <div class="bg-green-50 border border-green-200 rounded-xl p-4 shadow-sm">
             <p class="text-sm text-green-700 font-semibold mb-1">Total Pemasukan</p>
             <h2 class="text-2xl font-bold text-green-800">Rp{{ number_format($pemasukan, 0, ',', '.') }}</h2>
@@ -31,12 +38,6 @@
             <p class="text-sm text-red-700 font-semibold mb-1">Total Pengeluaran</p>
             <h2 class="text-2xl font-bold text-red-800">Rp{{ number_format($pengeluaran, 0, ',', '.') }}</h2>
             <p class="text-xs text-gray-500 mt-1">Dari semua transaksi dengan status <b>Keluar</b></p>
-        </div>
-
-        <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 shadow-sm">
-            <p class="text-sm text-blue-700 font-semibold mb-1">Saldo Saat Ini</p>
-            <h2 class="text-2xl font-bold text-blue-800">Rp{{ number_format($saldo, 0, ',', '.') }}</h2>
-            <p class="text-xs text-gray-500 mt-1">Selisih antara pemasukan dan pengeluaran</p>
         </div>
     </div>
 
@@ -77,33 +78,36 @@
         </ul>
     </div>
 
-    <!-- Chart.js -->
+    <!-- ChartJS -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         document.addEventListener('livewire:load', function() {
-            Livewire.on('refreshCharts', (chartData, kategoriChart) => {
-                renderCharts(chartData, kategoriChart);
-            });
-
-            renderCharts(@json($chartData), @json($kategoriChart));
+            let chartTransaksi = null;
+            let chartKategori = null;
 
             function renderCharts(chartData, kategoriChart) {
-                new Chart(document.getElementById('chartTransaksi'), {
+                // Hapus chart lama kalau ada
+                if (chartTransaksi) chartTransaksi.destroy();
+                if (chartKategori) chartKategori.destroy();
+
+                // Chart 1: Pemasukan & Pengeluaran
+                const ctx1 = document.getElementById('chartTransaksi').getContext('2d');
+                chartTransaksi = new Chart(ctx1, {
                     type: 'bar',
                     data: {
                         labels: chartData.labels,
                         datasets: [{
                                 label: 'Pemasukan',
                                 data: chartData.pemasukan,
-                                backgroundColor: 'rgba(16, 185, 129, 0.5)',
-                                borderColor: 'rgba(16, 185, 129, 1)',
+                                backgroundColor: 'rgba(16,185,129,0.5)',
+                                borderColor: 'rgba(16,185,129,1)',
                                 borderWidth: 1,
                             },
                             {
                                 label: 'Pengeluaran',
                                 data: chartData.pengeluaran,
-                                backgroundColor: 'rgba(239, 68, 68, 0.5)',
-                                borderColor: 'rgba(239, 68, 68, 1)',
+                                backgroundColor: 'rgba(239,68,68,0.5)',
+                                borderColor: 'rgba(239,68,68,1)',
                                 borderWidth: 1,
                             },
                         ],
@@ -114,11 +118,13 @@
                             y: {
                                 beginAtZero: true
                             }
-                        }
-                    }
+                        },
+                    },
                 });
 
-                new Chart(document.getElementById('chartKategori'), {
+                // Chart 2: Kategori
+                const ctx2 = document.getElementById('chartKategori').getContext('2d');
+                chartKategori = new Chart(ctx2, {
                     type: 'doughnut',
                     data: {
                         labels: kategoriChart.labels,
@@ -137,10 +143,17 @@
                             legend: {
                                 position: 'bottom'
                             }
-                        }
+                        },
                     },
                 });
             }
+
+            renderCharts(@json($chartData), @json($kategoriChart));
+
+            Livewire.on('refreshCharts', (chartData, kategoriChart) => {
+                renderCharts(chartData, kategoriChart);
+            });
         });
     </script>
+
 </div>

@@ -19,27 +19,25 @@ class TransaksiIndex extends Component
 
     protected $listeners = ['deleteConfirmed' => 'deleteConfirmed'];
 
+    // reset halaman pagination tiap update
     protected $updatesQueryString = ['page'];
 
     public function mount()
     {
-        // Set kategori awal agar tidak null
-        $this->filteredKategoris = Kategori::where('user_id', Auth::id())->get();
+        // Set kategori awal agar tidak null di Blade
+        $this->filteredKategoris = Kategori::all();
     }
 
     public function render()
     {
-        $userId = Auth::id();
-
         $transaksis = Transaksi::with(['kategori', 'dompetAsal', 'dompetTujuan'])
-            ->where('user_id', $userId)
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
         return view('livewire.transaksi-index', [
             'transaksis' => $transaksis,
-            'kategoris' => Kategori::where('user_id', $userId)->get(),
-            'dompets' => Dompet::where('user_id', $userId)->get(),
+            'kategoris' => Kategori::all(),
+            'dompets' => Dompet::all(),
         ]);
     }
 
@@ -57,15 +55,11 @@ class TransaksiIndex extends Component
 
     public function updatedStatus($value)
     {
-        $userId = Auth::id();
-
         // Filter kategori sesuai type/status
         if (in_array($value, ['Masuk', 'Keluar'])) {
-            $this->filteredKategoris = Kategori::where('user_id', $userId)
-                ->where('type', $value)
-                ->get();
+            $this->filteredKategoris = Kategori::where('type', $value)->get();
         } else {
-            $this->filteredKategoris = Kategori::where('user_id', $userId)->get();
+            $this->filteredKategoris = Kategori::all();
         }
     }
 
@@ -112,8 +106,7 @@ class TransaksiIndex extends Component
 
     public function edit($id)
     {
-        $userId = Auth::id();
-        $transaksi = Transaksi::where('user_id', $userId)->findOrFail($id);
+        $transaksi = Transaksi::findOrFail($id);
 
         $this->transaksiId = $id;
         $this->keterangan = $transaksi->keterangan;
@@ -125,8 +118,8 @@ class TransaksiIndex extends Component
         $this->dompet_tujuan_id = $transaksi->dompet_tujuan_id;
 
         $this->filteredKategoris = in_array($this->status, ['Masuk', 'Keluar'])
-            ? Kategori::where('user_id', $userId)->where('type', $this->status)->get()
-            : Kategori::where('user_id', $userId)->get();
+            ? Kategori::where('type', $this->status)->get()
+            : Kategori::all();
 
         $this->isEdit = true;
         $this->isModalOpen = true;
@@ -139,10 +132,7 @@ class TransaksiIndex extends Component
 
     public function deleteConfirmed($id)
     {
-        $userId = Auth::id();
-        $transaksi = Transaksi::where('user_id', $userId)->find($id);
-
-        if ($transaksi) {
+        if ($transaksi = Transaksi::find($id)) {
             $transaksi->delete();
             $this->dispatch('swal:success', message: 'Data berhasil dihapus!');
         }
@@ -158,6 +148,6 @@ class TransaksiIndex extends Component
         $this->dompet_asal_id = '';
         $this->dompet_tujuan_id = '';
         $this->transaksiId = null;
-        $this->filteredKategoris = Kategori::where('user_id', Auth::id())->get();
+        $this->filteredKategoris = Kategori::all();
     }
 }

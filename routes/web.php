@@ -52,6 +52,9 @@ Route::middleware(['auth'])->group(function () {
         return view('dashboard'); // memanggil blade yang berisi <x-app-layout><livewire:dashboard/></x-app-layout>
     })->middleware('auth')->name('dashboard');
 
+    Route::get('/dashboard/chart-data', [DashboardController::class, 'chartData'])->name('dashboard.chart-data');
+
+
     // Transaksi
     Route::get('/transaksi', function () {
         return view('transaksi');

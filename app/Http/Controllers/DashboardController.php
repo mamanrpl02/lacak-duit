@@ -2,80 +2,54 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Transaksi;
-use App\Models\Dompet;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
+use App\Models\Transaksi;
+use App\Models\Kategori;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
-    public function index(Request $request)
+    public function chartData(Request $request)
     {
-        $bulan = $request->get('bulan', Carbon::now()->month);
-        $tahun = $request->get('tahun', Carbon::now()->year);
-        $selectedDompet = $request->get('dompet'); // dompet yang dipilih dari dropdown
+        $tanggal_dari = $request->tanggal_dari ?? now()->startOfMonth()->format('Y-m-d');
+        $tanggal_sampai = $request->tanggal_sampai ?? now()->endOfMonth()->format('Y-m-d');
+        $dompet_id = $request->dompet_id;
 
         $query = Transaksi::where('user_id', Auth::id())
-            ->whereMonth('created_at', $bulan)
-            ->whereYear('created_at', $tahun);
+            ->whereBetween('tanggal', [$tanggal_dari, $tanggal_sampai]);
 
-        if ($selectedDompet) {
-            $query->where(function ($q) use ($selectedDompet) {
-                $q->where('dompet_asal_id', $selectedDompet)
-                  ->orWhere('dompet_tujuan_id', $selectedDompet);
+        if ($dompet_id) {
+            $query->where(function ($q) use ($dompet_id) {
+                $q->where('dompet_asal_id', $dompet_id)
+                  ->orWhere('dompet_tujuan_id', $dompet_id);
             });
         }
 
         $transaksis = $query->get();
 
-        // 💰 Hitung saldo semua dompet (berdasarkan transaksi)
-        $dompetSaldos = Dompet::select('id', 'nama_dompet')
-            ->withSum(['transaksiAsal as keluar' => function ($q) {
-                $q->where('status', 'Keluar')
-                  ->orWhere('status', 'Withdraw');
-            }], 'nominal')
-            ->withSum(['transaksiTujuan as masuk' => function ($q) {
-                $q->where('status', 'Masuk')
-                  ->orWhere('status', 'Withdraw');
-            }], 'nominal')
-            ->get()
-            ->map(function ($d) {
-                $d->saldo = ($d->masuk ?? 0) - ($d->keluar ?? 0);
-                return $d;
-            });
+        // Chart Bulanan
+        $grouped = $transaksis->groupBy(function($item){
+            return Carbon::parse($item->tanggal)->format('M Y');
+        });
 
-        // Total saldo aktif (semua dompet)
-        $totalSaldo = $dompetSaldos->sum('saldo');
+        $chartData = [
+            'labels' => $grouped->keys()->toArray(),
+            'pemasukan' => $grouped->map(fn($g) => $g->where('status','Masuk')->sum('nominal'))->values()->toArray(),
+            'pengeluaran' => $grouped->map(fn($g) => $g->where('status','Keluar')->sum('nominal'))->values()->toArray(),
+            'withdraw' => $grouped->map(fn($g) => $g->where('status','Withdraw')->sum('nominal'))->values()->toArray(),
+        ];
 
-        // Pemasukan & pengeluaran bulan ini
-        $pemasukan = $transaksis->where('status', 'Masuk')->sum('nominal');
-        $pengeluaran = $transaksis->where('status', 'Keluar')->sum('nominal');
+        // Chart Kategori
+        $kategoriGroup = $transaksis->groupBy('kategori_id');
+        $kategoriChart = [
+            'labels' => $kategoriGroup->keys()->map(fn($id) => optional(Kategori::find($id))->nama_kategori ?? 'Tanpa Kategori')->toArray(),
+            'data' => $kategoriGroup->map(fn($g) => $g->sum('nominal'))->values()->toArray(),
+        ];
 
-        // 📊 Chart kategori (bulan ini)
-        $chartKategori = Transaksi::select('kategori_id', DB::raw('SUM(nominal) as total'))
-            ->where('user_id', Auth::id())
-            ->whereMonth('created_at', $bulan)
-            ->whereYear('created_at', $tahun)
-            ->groupBy('kategori_id')
-            ->with('kategori')
-            ->get();
-
-        // Ambil 1 kategori paling tinggi bulan ini
-        $kategoriTeratas = $chartKategori->sortByDesc('total')->first();
-
-        return view('dashboard', compact(
-            'bulan',
-            'tahun',
-            'transaksis',
-            'totalSaldo',
-            'pemasukan',
-            'pengeluaran',
-            'chartKategori',
-            'dompetSaldos',
-            'kategoriTeratas',
-            'selectedDompet'
-        ));
+        return response()->json([
+            'chartData' => $chartData,
+            'kategoriChart' => $kategoriChart
+        ]);
     }
 }

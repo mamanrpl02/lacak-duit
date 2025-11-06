@@ -41,32 +41,39 @@
         </div>
     </div>
 
+
+    <!-- Grafik -->
     <!-- Grafik -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Grafik Pemasukan & Pengeluaran -->
-        <div class="bg-white rounded-xl p-5 shadow-sm border">
+        <div class="bg-white rounded-xl p-5 shadow-sm border flex flex-col h-full">
             <div class="flex justify-between items-center mb-3">
                 <h2 class="text-lg font-semibold text-gray-700">Grafik Pemasukan & Pengeluaran</h2>
                 <span class="text-sm text-gray-400">Per Bulan</span>
             </div>
-            <canvas id="chartTransaksi" class="h-64"></canvas>
+            <div class="flex-1">
+                <canvas id="chartTransaksi" class="w-full h-64"></canvas>
+            </div>
             <p class="text-xs text-gray-500 mt-3">
                 Grafik ini menampilkan tren pemasukan dan pengeluaran sepanjang tahun berjalan.
             </p>
         </div>
 
         <!-- Grafik Kategori -->
-        <div class="bg-white rounded-xl p-5 shadow-sm border">
+        <div class="bg-white rounded-xl p-5 shadow-sm border flex flex-col h-full">
             <div class="flex justify-between items-center mb-3">
                 <h2 class="text-lg font-semibold text-gray-700">Kategori Transaksi Terbanyak</h2>
                 <span class="text-sm text-gray-400">Berdasarkan Total Nominal</span>
             </div>
-            <canvas id="chartKategori" class="h-64"></canvas>
+            <div class="flex-1">
+                <canvas id="chartKategori" class="w-full h-64"></canvas>
+            </div>
             <p class="text-xs text-gray-500 mt-3">
                 Menampilkan kategori yang paling sering digunakan berdasarkan total nilai transaksi.
             </p>
         </div>
     </div>
+
 
     <!-- Catatan Ringkas -->
     <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 mt-4">
@@ -79,81 +86,106 @@
     </div>
 
     <!-- ChartJS -->
+
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        document.addEventListener('livewire:load', function() {
-            let chartTransaksi = null;
-            let chartKategori = null;
+        document.addEventListener('DOMContentLoaded', function() {
 
-            function renderCharts(chartData, kategoriChart) {
-                // Hapus chart lama kalau ada
-                if (chartTransaksi) chartTransaksi.destroy();
-                if (chartKategori) chartKategori.destroy();
+            const chartTransaksiCtx = document.getElementById('chartTransaksi').getContext('2d');
+            const chartKategoriCtx = document.getElementById('chartKategori').getContext('2d');
 
-                // Chart 1: Pemasukan & Pengeluaran
-                const ctx1 = document.getElementById('chartTransaksi').getContext('2d');
-                chartTransaksi = new Chart(ctx1, {
-                    type: 'bar',
-                    data: {
-                        labels: chartData.labels,
-                        datasets: [{
-                                label: 'Pemasukan',
-                                data: chartData.pemasukan,
-                                backgroundColor: 'rgba(16,185,129,0.5)',
-                                borderColor: 'rgba(16,185,129,1)',
-                                borderWidth: 1,
-                            },
-                            {
-                                label: 'Pengeluaran',
-                                data: chartData.pengeluaran,
-                                backgroundColor: 'rgba(239,68,68,0.5)',
-                                borderColor: 'rgba(239,68,68,1)',
-                                borderWidth: 1,
-                            },
-                        ],
-                    },
-                    options: {
-                        responsive: true,
-                        scales: {
-                            y: {
-                                beginAtZero: true
-                            }
+            let chartTransaksi, chartKategori;
+
+            async function loadChartData() {
+                // Ambil value filter
+                const tanggal_dari = document.querySelector('input[wire\\:model\\.lazy="tanggal_dari"]').value;
+                const tanggal_sampai = document.querySelector('input[wire\\:model\\.lazy="tanggal_sampai"]')
+                    .value;
+                const dompet_id = document.querySelector('select[wire\\:model\\.lazy="dompet_id"]').value;
+
+                const url =
+                    `/dashboard/chart-data?tanggal_dari=${tanggal_dari}&tanggal_sampai=${tanggal_sampai}&dompet_id=${dompet_id}`;
+
+                const res = await fetch(url);
+                const data = await res.json();
+
+                // Chart Transaksi
+                if (chartTransaksi) {
+                    chartTransaksi.data.labels = data.chartData.labels;
+                    chartTransaksi.data.datasets[0].data = data.chartData.pemasukan;
+                    chartTransaksi.data.datasets[1].data = data.chartData.pengeluaran;
+                    chartTransaksi.update();
+                } else {
+                    chartTransaksi = new Chart(chartTransaksiCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: data.chartData.labels,
+                            datasets: [{
+                                    label: 'Pemasukan',
+                                    data: data.chartData.pemasukan,
+                                    backgroundColor: 'rgba(16,185,129,0.5)',
+                                    borderColor: 'rgba(16,185,129,1)',
+                                    borderWidth: 1
+                                },
+                                {
+                                    label: 'Pengeluaran',
+                                    data: data.chartData.pengeluaran,
+                                    backgroundColor: 'rgba(239,68,68,0.5)',
+                                    borderColor: 'rgba(239,68,68,1)',
+                                    borderWidth: 1
+                                }
+                            ]
                         },
-                    },
-                });
-
-                // Chart 2: Kategori
-                const ctx2 = document.getElementById('chartKategori').getContext('2d');
-                chartKategori = new Chart(ctx2, {
-                    type: 'doughnut',
-                    data: {
-                        labels: kategoriChart.labels,
-                        datasets: [{
-                            label: 'Total per Kategori',
-                            data: kategoriChart.data,
-                            backgroundColor: [
-                                '#3B82F6', '#10B981', '#F59E0B', '#EF4444',
-                                '#8B5CF6', '#06B6D4', '#F97316',
-                            ],
-                        }],
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: {
-                                position: 'bottom'
+                        options: {
+                            responsive: true,
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                }
                             }
+                        }
+                    });
+                }
+
+                // Chart Kategori
+                if (chartKategori) {
+                    chartKategori.data.labels = data.kategoriChart.labels;
+                    chartKategori.data.datasets[0].data = data.kategoriChart.data;
+                    chartKategori.update();
+                } else {
+                    chartKategori = new Chart(chartKategoriCtx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: data.kategoriChart.labels,
+                            datasets: [{
+                                label: 'Total per Kategori',
+                                data: data.kategoriChart.data,
+                                backgroundColor: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444']
+                            }]
                         },
-                    },
-                });
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom'
+                                }
+                            }
+                        }
+                    });
+                }
             }
 
-            renderCharts(@json($chartData), @json($kategoriChart));
+            // Load pertama kali
+            loadChartData();
 
-            Livewire.on('refreshCharts', (chartData, kategoriChart) => {
-                renderCharts(chartData, kategoriChart);
-            });
+            // Update saat filter berubah
+            const inputs = document.querySelectorAll('input[wire\\:model\\.lazy], select[wire\\:model\\.lazy]');
+            inputs.forEach(el => el.addEventListener('change', loadChartData));
         });
     </script>
+
+
+
 
 </div>

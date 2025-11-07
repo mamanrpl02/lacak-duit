@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Feedback;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Http;
 use Carbon\Carbon;
+use App\Models\Feedback;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http; // 👈 Tambahkan ini
 
 class FeedbackController extends Controller
 {
@@ -18,48 +19,49 @@ class FeedbackController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email',
             'feedback' => 'required|string|max:1000',
+            'rating' => 'required|integer|min:1|max:5',
+        ], [
+            'feedback.required' => 'Pesan feedback tidak boleh kosong.',
+            'rating.required' => 'Silakan pilih rating terlebih dahulu.',
         ]);
 
-        // 🧠 Batas 5 feedback per bulan per user
-        $userId = auth()->id();
-        $bulanIni = Carbon::now()->startOfMonth();
-        $jumlahFeedback = Feedback::where('user_id', $userId)
-            ->where('created_at', '>=', $bulanIni)
+        $user = Auth::user();
+
+        // Batasi 5 feedback per bulan
+        $feedbackCountThisMonth = Feedback::where('user_id', $user->id)
+            ->whereMonth('created_at', Carbon::now()->month)
+            ->whereYear('created_at', Carbon::now()->year)
             ->count();
 
-        if ($jumlahFeedback >= 5) {
-            return redirect()
-                ->back()
-                ->with('error', 'Kamu sudah mencapai batas maksimal 5 feedback bulan ini, Tunggu lagi bulan depan ya! ');
+        if ($feedbackCountThisMonth >= 5) {
+            return response()->json([
+                'error' => 'Kamu sudah mencapai batas maksimal 5 feedback dalam bulan ini. Terima kasih atas partisipasinya!'
+            ], 400);
         }
 
-        // 📝 Simpan ke database
-        Feedback::create([
-            'user_id' => $userId,
-            'name' => $validated['name'],
-            'email' => $validated['email'],
+        // Simpan ke database
+        $feedback = Feedback::create([
+            'user_id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
             'feedback' => $validated['feedback'],
+            'rating' => $validated['rating'],
         ]);
 
-        // 📤 Kirim ke Google Sheets
+        // Kirim ke Google Spreadsheet (pakai JSON)
         try {
-            $url = env('GOOGLE_SHEET_WEBHOOK');
-
-            Http::withHeaders(['Content-Type' => 'application/json'])
-                ->post($url, [
-                    'name' => $validated['name'],
-                    'email' => $validated['email'],
-                    'feedback' => $validated['feedback'],
-                ]);
+            Http::asJson()->post('https://script.google.com/macros/s/AKfycbxHaAANZSRqlKCic5RkbXMxxytnXaDTdxektqeFjNdP7424_cy_X_TA3M6Tmd_U5BU/exec', [
+                'name' => $feedback->name,
+                'email' => $feedback->email,
+                'rating' => $feedback->rating, // 💛 akan terbaca karena dikirim sebagai JSON
+                'feedback' => $feedback->feedback,
+                'created_at' => $feedback->created_at->toDateTimeString(), // opsional tapi berguna
+            ]);
         } catch (\Exception $e) {
-            Log::error('Gagal kirim ke Google Sheet: ' . $e->getMessage());
+            Log::error('Gagal kirim ke Spreadsheet: ' . $e->getMessage());
         }
 
-        return redirect()
-            ->route('dashboard')
-            ->with('success', 'Terima kasih! Feedback kamu sudah dikirim');
+        return response()->json(['message' => 'Feedback berhasil dikirim!']);
     }
 }

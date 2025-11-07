@@ -16,5 +16,6 @@ class Feedback extends Model
         'name',
         'email',
         'feedback',
+        'rating',
     ];
 }

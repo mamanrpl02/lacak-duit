@@ -137,8 +137,7 @@
 
                 <div id="dropdownMenu"
                     class="hidden absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-lg border p-2 text-sm">
-                    <a href="#" class="block px-3 py-2 hover:bg-gray-100 rounded">Profil</a>
-                    <a href="#" class="block px-3 py-2 hover:bg-gray-100 rounded">Pengaturan</a>
+                    <a href="{{ route('profile.edit') }}" class="block px-3 py-2 hover:bg-gray-100 rounded">Profil</a>
                     <hr class="my-1" />
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
@@ -155,6 +154,14 @@
         <main class="p-6">
             {{ $slot }}
         </main>
+
+        <!-- Footer -->
+        <footer class="text-center text-sm text-gray-500 mt-10 mb-4">
+            Dukung Lacak Duit Melalu
+            <a href="https://saweria.co/namakamu" target="_blank" class="text-blue-500 hover:underline">
+                Tautan Ini
+            </a>.
+        </footer>
     </div>
 
     <!-- Script Sidebar -->

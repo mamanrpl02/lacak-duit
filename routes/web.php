@@ -10,6 +10,7 @@ use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Livewire\Dashboard;
+use App\Http\Controllers\ProfileController;
 
 
 
@@ -54,6 +55,12 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/dashboard/chart-data', [DashboardController::class, 'chartData'])->name('dashboard.chart-data');
 
+
+    // Profile
+    Route::view('/profile', 'profile')->name('profile.edit');
+    Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('password.update');
+    Route::delete('/profile/delete', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // Transaksi
     Route::get('/transaksi', function () {

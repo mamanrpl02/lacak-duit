@@ -35,6 +35,11 @@ class Transaksi extends Model
         });
     }
 
+    public function dompet()
+{
+    return $this->belongsTo(Dompet::class, 'dompet_id');
+}
+
 
     public function kategori()
     {

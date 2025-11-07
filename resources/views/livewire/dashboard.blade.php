@@ -13,9 +13,10 @@
             <select wire:model.lazy="dompet_id" class="border rounded-lg px-3 py-2 text-sm">
                 <option value="">Semua Dompet</option>
                 @foreach ($dompetList as $id => $nama)
-                    <option value="{{ $id }}">{{ $nama }}</option>
+                    <option value="{{ (int) $id }}">{{ $nama }}</option>
                 @endforeach
             </select>
+
         </div>
     </div>
 

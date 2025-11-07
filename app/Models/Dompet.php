@@ -18,8 +18,9 @@ class Dompet extends Model
 
     public function transaksis()
     {
-        return $this->hasMany(Transaksi::class);
+        return $this->hasMany(Transaksi::class, 'dompet_id');
     }
+
 
     public function transaksiAsal()
     {

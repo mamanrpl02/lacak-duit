@@ -14,7 +14,7 @@ class DashboardController extends Controller
     {
         $tanggal_dari = $request->tanggal_dari ?? now()->startOfMonth()->format('Y-m-d');
         $tanggal_sampai = $request->tanggal_sampai ?? now()->endOfMonth()->format('Y-m-d');
-        $dompet_id = $request->dompet_id;
+        $dompet_id = $request->dompet_id ? (int)$request->dompet_id : null;
 
         $query = Transaksi::where('user_id', Auth::id())
             ->whereBetween('tanggal', [$tanggal_dari, $tanggal_sampai]);
@@ -28,28 +28,46 @@ class DashboardController extends Controller
 
         $transaksis = $query->get();
 
-        // Chart Bulanan
-        $grouped = $transaksis->groupBy(function($item){
-            return Carbon::parse($item->tanggal)->format('M Y');
-        });
+        // === Chart Bulanan ===
+        $grouped = $transaksis->groupBy(fn($item) => Carbon::parse($item->tanggal)->format('M Y'));
 
         $chartData = [
             'labels' => $grouped->keys()->toArray(),
-            'pemasukan' => $grouped->map(fn($g) => $g->where('status','Masuk')->sum('nominal'))->values()->toArray(),
-            'pengeluaran' => $grouped->map(fn($g) => $g->where('status','Keluar')->sum('nominal'))->values()->toArray(),
-            'withdraw' => $grouped->map(fn($g) => $g->where('status','Withdraw')->sum('nominal'))->values()->toArray(),
+            'pemasukan' => $grouped->map(function ($g) use ($dompet_id) {
+                if ($dompet_id) {
+                    return $g->filter(fn($t) =>
+                        ($t->status === 'Masuk' && (int)$t->dompet_asal_id === $dompet_id) ||
+                        ($t->status === 'Withdraw' && (int)$t->dompet_tujuan_id === $dompet_id)
+                    )->sum('nominal');
+                }
+                return $g->where('status', 'Masuk')->sum('nominal');
+            })->values()->toArray(),
+
+            'pengeluaran' => $grouped->map(function ($g) use ($dompet_id) {
+                if ($dompet_id) {
+                    return $g->filter(fn($t) =>
+                        ($t->status === 'Keluar' && (int)$t->dompet_tujuan_id === $dompet_id) ||
+                        ($t->status === 'Withdraw' && (int)$t->dompet_asal_id === $dompet_id)
+                    )->sum('nominal');
+                }
+                return $g->where('status', 'Keluar')->sum('nominal');
+            })->values()->toArray(),
+
+            'withdraw' => $grouped->map(fn($g) => $g->where('status', 'Withdraw')->sum('nominal'))->values()->toArray(),
         ];
 
-        // Chart Kategori
+        // === Chart Kategori ===
         $kategoriGroup = $transaksis->groupBy('kategori_id');
         $kategoriChart = [
-            'labels' => $kategoriGroup->keys()->map(fn($id) => optional(Kategori::find($id))->nama_kategori ?? 'Tanpa Kategori')->toArray(),
+            'labels' => $kategoriGroup->keys()->map(fn($id) =>
+                optional(Kategori::find($id))->nama_kategori ?? 'Tanpa Kategori'
+            )->toArray(),
             'data' => $kategoriGroup->map(fn($g) => $g->sum('nominal'))->values()->toArray(),
         ];
 
         return response()->json([
             'chartData' => $chartData,
-            'kategoriChart' => $kategoriChart
+            'kategoriChart' => $kategoriChart,
         ]);
     }
 }

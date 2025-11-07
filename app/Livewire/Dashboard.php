@@ -45,12 +45,12 @@ class Dashboard extends Component
         $transaksis = $query->get();
         $dompetId = $this->dompet_id ? (int)$this->dompet_id : null;
 
-        Log::debug('=== LOAD DATA DASHBOARD ===', [
-            'dompet_id' => $dompetId,
-            'tanggal_dari' => $this->tanggal_dari,
-            'tanggal_sampai' => $this->tanggal_sampai,
-            'total_transaksi' => $transaksis->count(),
-        ]);
+        // Log::debug('=== LOAD DATA DASHBOARD ===', [
+        //     'dompet_id' => $dompetId,
+        //     'tanggal_dari' => $this->tanggal_dari,
+        //     'tanggal_sampai' => $this->tanggal_sampai,
+        //     'total_transaksi' => $transaksis->count(),
+        // ]);
 
         if ($dompetId) {
             // === Filter berdasarkan dompet aktif ===
@@ -103,12 +103,12 @@ class Dashboard extends Component
             'data' => $kategoriGroup->map(fn($g) => $g->sum('nominal'))->values()->toArray(),
         ];
 
-        Log::debug('HASIL PERHITUNGAN', [
-            'pemasukan' => $this->pemasukan,
-            'pengeluaran' => $this->pengeluaran,
-            'withdraw' => $this->withdraw,
-            'saldo' => $this->saldo,
-        ]);
+        // Log::debug('HASIL PERHITUNGAN', [
+        //     'pemasukan' => $this->pemasukan,
+        //     'pengeluaran' => $this->pengeluaran,
+        //     'withdraw' => $this->withdraw,
+        //     'saldo' => $this->saldo,
+        // ]);
     }
 
     // === Fungsi Withdraw ===

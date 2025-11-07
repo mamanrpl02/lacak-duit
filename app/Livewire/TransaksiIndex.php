@@ -55,13 +55,16 @@ class TransaksiIndex extends Component
 
     public function updatedStatus($value)
     {
-        // Filter kategori sesuai type/status
-        if (in_array($value, ['Masuk', 'Keluar'])) {
+        if (in_array($value, ['Masuk', 'Keluar', 'Withdraw'])) {
             $this->filteredKategoris = Kategori::where('type', $value)->get();
         } else {
             $this->filteredKategoris = Kategori::all();
         }
+
+        // Reset kategori_id saat status berubah agar dropdown tidak menampilkan kategori lama
+        $this->kategori_id = '';
     }
+
 
     public function store()
     {

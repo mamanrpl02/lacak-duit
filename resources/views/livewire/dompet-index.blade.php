@@ -1,19 +1,61 @@
-<div>
-    <div class="p-6">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4 sm:gap-0">
-            <h2 class="text-xl font-semibold text-gray-800">Kelola Dompet</h2>
+<div class="p-6 space-y-6">
+
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800">Dompet Saya</h1>
+            <p class="text-gray-500 text-sm">Kelola semua dompet keuangan kamu di sini</p>
+        </div>
+        <div>
             <button wire:click="openModal"
-                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition w-full sm:w-auto">
-                + Tambah Data
+                class="w-full md:w-auto px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium">
+                + Tambah Dompet
             </button>
         </div>
+    </div>
 
-        {{-- Modal --}}
-        @if ($isModalOpen)
-            <div class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-                <div class="bg-white rounded-2xl shadow-lg w-full max-w-lg relative animate-fadeIn">
-                    <button wire:click="closeModal"
-                        class="absolute top-3 right-3 text-gray-500 hover:text-gray-700">✕</button>
+    <!-- Daftar Dompet -->
+    <div class="bg-white rounded-xl shadow-sm border p-4 sm:p-6">
+        <h2 class="text-lg font-semibold text-gray-800 mb-4">Daftar Dompet</h2>
+
+        @if ($dompets->count() > 0)
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                @foreach ($dompets as $dompet)
+                    <div class="border rounded-xl p-4 hover:shadow-md transition bg-gray-50 flex flex-col justify-between">
+                        <div>
+                            <h3 class="font-semibold text-gray-800 text-base mb-1">{{ $dompet->nama_dompet }}</h3>
+                            <p class="text-gray-600 text-sm mb-3 break-words">{{ $dompet->keterangan }}</p>
+                        </div>
+                        <div class="flex flex-wrap gap-2 mt-auto">
+                            <button wire:click="edit({{ $dompet->id }})"
+                                class="flex-1 md:flex-none px-3 py-2 bg-yellow-500 text-white text-sm rounded-lg hover:bg-yellow-600">
+                                Edit
+                            </button>
+                            <button wire:click="delete({{ $dompet->id }})"
+                                class="flex-1 md:flex-none px-3 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700">
+                                Hapus
+                            </button>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        @else
+            <p class="text-gray-500 text-center py-6">Belum ada dompet yang ditambahkan.</p>
+        @endif
+
+        <div class="mt-4">
+            {{ $dompets->links() }}
+        </div>
+    </div>
+
+    <!-- Modal -->
+    @if ($isModalOpen)
+        <div class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+            <div class="bg-white rounded-xl shadow-lg w-full max-w-md relative animate-fadeIn">
+                <button wire:click="closeModal"
+                    class="absolute top-3 right-3 text-gray-400 hover:text-gray-600">✕</button>
+
+                <div class="p-5">
                     <h3 class="text-lg font-semibold mb-4 text-gray-800">
                         {{ $dompet_id ? 'Edit Dompet' : 'Tambah Dompet' }}
                     </h3>
@@ -22,19 +64,21 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Nama Dompet</label>
                             <input type="text" wire:model="nama_dompet"
-                                class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                                class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
                             @error('nama_dompet')
-                                <span class="text-red-500 text-xs">{{ $message }}</span>
+                                <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
                             @enderror
                         </div>
+
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Keterangan</label>
                             <textarea wire:model="keterangan"
-                                class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                                class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
                         </div>
-                        <div class="flex flex-col sm:flex-row justify-end gap-2">
+
+                        <div class="flex flex-col sm:flex-row justify-end gap-2 pt-2">
                             <button type="button" wire:click="closeModal"
-                                class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 w-full sm:w-auto">
+                                class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 w-full sm:w-auto">
                                 Batal
                             </button>
                             <button type="submit"
@@ -45,47 +89,8 @@
                     </form>
                 </div>
             </div>
-        @endif
-
-        {{-- Table --}}
-        <div class="overflow-x-auto bg-white shadow rounded-2xl p-4">
-            <table class="min-w-full text-sm text-left text-gray-700">
-                <thead class="border-b text-gray-600 uppercase text-xs">
-                    <tr>
-                        <th class="px-4 py-3">Nama Dompet</th>
-                        <th class="px-4 py-3">Keterangan</th>
-                        <th class="px-4 py-3 text-center">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse ($dompets as $dompet)
-                        <tr class="border-b hover:bg-gray-50 transition">
-                            <td class="px-4 py-3 font-medium text-gray-800">{{ $dompet->nama_dompet }}</td>
-                            <td class="px-4 py-3 text-gray-600">{{ $dompet->keterangan }}</td>
-                            <td class="px-4 py-3 text-center flex flex-col sm:flex-row justify-center gap-2">
-                                <button wire:click="edit({{ $dompet->id }})"
-                                    class="px-3 py-1 text-sm bg-yellow-500 text-white rounded hover:bg-yellow-600">
-                                    Edit
-                                </button>
-                                <button wire:click="delete({{ $dompet->id }})"
-                                    class="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700">
-                                    Hapus
-                                </button>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="3" class="text-center py-4 text-gray-500">Belum ada data dompet.</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-
-            <div class="mt-4">
-                {{ $dompets->links() }}
-            </div>
         </div>
-    </div>
+    @endif
 
     <style>
         @keyframes fadeIn {
@@ -93,13 +98,16 @@
                 opacity: 0;
                 transform: scale(0.95);
             }
+
             to {
                 opacity: 1;
                 transform: scale(1);
             }
         }
+
         .animate-fadeIn {
             animation: fadeIn 0.2s ease-out;
         }
     </style>
+
 </div>

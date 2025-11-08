@@ -29,12 +29,12 @@
 
 <body class="bg-gray-50 min-h-screen flex text-gray-800 antialiased">
 
-    <!-- Overlay (untuk mobile) -->
+    <!-- Overlay (untuk mobile & tablet) -->
     <div id="overlay" class="fixed inset-0 bg-black bg-opacity-30 z-40 hidden"></div>
 
     <!-- Sidebar -->
     <aside id="sidebar"
-        class="bg-white shadow-md w-64 p-4 flex flex-col justify-between fixed h-screen transition-all duration-300 z-50 -translate-x-full md:translate-x-0">
+        class="bg-white shadow-md w-64 p-4 flex flex-col justify-between fixed h-screen transition-all duration-300 z-50 -translate-x-full lg:translate-x-0">
         <div>
             <!-- Logo -->
             <div class="flex align-middle items-center gap-2 mb-8">
@@ -77,7 +77,7 @@
                         class="ml-auto bg-yellow-100 text-yellow-700 text-xs font-medium px-2 py-0.5 rounded transition-all menu-text">Segera</span>
                 </a>
 
-                <!-- 🔹 Menu Feedback (baru, dipindahkan ke bawah menu Segera) -->
+                <!-- 🔹 Menu Feedback -->
                 <a href="{{ route('feedback.create') }}"
                     class="flex items-center gap-3 p-3 rounded-lg hover:bg-blue-50 transition group">
                     <i class="bi bi-chat-dots text-blue-600"></i>
@@ -95,15 +95,12 @@
                     manzweb.my.id
                 </a>
             </p>
-
-            <!-- 🔹 Versi Aplikasi -->
             <p class="text-gray-300 mt-2">v1.0.0</p>
         </div>
     </aside>
 
-
     <!-- Main Content -->
-    <div id="mainContent" class="flex-1 transition-all duration-300 ml-0 md:ml-64">
+    <div id="mainContent" class="flex-1 transition-all duration-300 ml-0 lg:ml-64">
 
         <!-- Topbar -->
         <header id="topbar"
@@ -150,16 +147,16 @@
             </div>
         </header>
 
-        <!-- Halaman dinamis -->
+        <!-- Halaman Dinamis -->
         <main class="p-6">
             {{ $slot }}
         </main>
 
         <!-- Footer -->
         <footer class="text-center text-sm text-gray-500 mt-10 mb-4">
-            Dukung Lacak Duit Melalu
+            Dukung Lacak Duit melalui
             <a href="https://saweria.co/namakamu" target="_blank" class="text-blue-500 hover:underline">
-                Tautan Ini
+                tautan ini
             </a>.
         </footer>
     </div>
@@ -172,12 +169,11 @@
         const profileBtn = document.getElementById("profileBtn");
         const dropdownMenu = document.getElementById("dropdownMenu");
         const overlay = document.getElementById("overlay");
-        const topbar = document.getElementById("topbar");
 
         let collapsed = false;
 
         toggleSidebar.addEventListener("click", () => {
-            if (window.innerWidth >= 768) {
+            if (window.innerWidth >= 1024) {
                 collapsed = !collapsed;
                 sidebar.classList.toggle("w-64");
                 sidebar.classList.toggle("w-20");
@@ -199,12 +195,13 @@
         profileBtn.addEventListener("click", () => dropdownMenu.classList.toggle("hidden"));
 
         document.addEventListener("click", (e) => {
-            if (!profileBtn.contains(e.target) && !dropdownMenu.contains(e.target)) dropdownMenu.classList.add(
-                "hidden");
+            if (!profileBtn.contains(e.target) && !dropdownMenu.contains(e.target)) {
+                dropdownMenu.classList.add("hidden");
+            }
         });
 
         window.addEventListener("resize", () => {
-            if (window.innerWidth < 768) {
+            if (window.innerWidth < 1024) {
                 sidebar.classList.add("-translate-x-full");
                 overlay.classList.add("hidden");
                 mainContent.style.marginLeft = "0";
@@ -216,7 +213,6 @@
         });
     </script>
 
-
     <script>
         function showComingSoon() {
             Swal.fire({
@@ -227,7 +223,6 @@
             });
         }
     </script>
-
 
     @stack('scripts')
     @livewireScripts

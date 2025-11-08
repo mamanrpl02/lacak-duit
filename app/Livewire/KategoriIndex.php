@@ -17,6 +17,34 @@ class KategoriIndex extends Component
     public $kategori_id = null;
     public $isModalOpen = false;
     public $isEdit = false;
+    public $search = '';
+
+    public function updatingSearch()
+    {
+        $this->resetPage();
+    }
+
+
+    public function render()
+    {
+        $search = $this->search;
+
+ 
+
+        return view('livewire.kategori-index', [
+            'kategoris' => Kategori::where('user_id', Auth::id())
+                ->when($search, function ($query) use ($search) {
+                    $query->where(function ($q) use ($search) {
+                        $q->where('nama_kategori', 'like', "%{$search}%")
+                            ->orWhere('type', 'like', "%{$search}%")
+                            ->orWhere('keterangan', 'like', "%{$search}%");
+                    });
+                })
+                ->latest()
+                ->paginate(10),
+        ]);
+    }
+
 
     protected $listeners = ['deleteKategori' => 'delete'];
 
@@ -27,15 +55,7 @@ class KategoriIndex extends Component
         'gambar_icon' => 'nullable|image|max:2048',
     ];
 
-    public function render()
-    {
-        return view('livewire.kategori-index', [
-            // ✅ hanya tampilkan kategori milik user login
-            'kategoris' => Kategori::where('user_id', Auth::id())
-                ->latest()
-                ->paginate(10),
-        ]);
-    }
+
 
     public function openModal()
     {

@@ -1,194 +1,231 @@
 <div class="p-6">
-    <div class="flex justify-between items-center mb-4">
-        <h1 class="text-xl font-semibold text-gray-700">Daftar Transaksi</h1>
-        <button wire:click="openModal" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">+
-            Tambah</button>
-    </div>
+    <!-- Header -->
+    <section>
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold text-gray-800">Kelola Transaksi</h2>
+            <button wire:click="openModal"
+                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                + Tambah Transaksi
+            </button>
+        </div>
+    </section>
 
-    <div class="bg-white shadow rounded-xl mt-2 p-4 overflow-x-auto">
-        <table class="min-w-full text-sm text-gray-700 border-collapse">
-            <thead class="border-b text-gray-600 uppercase text-xs text-left">
-                <tr>
-                    <th class="py-2 px-4">Keterangan</th>
-                    <th class="py-2 px-4">Nominal</th>
-                    <th class="py-2 px-4">Tanggal</th>
-                    <th class="py-2 px-4">Status</th>
-                    <th class="py-2 px-4">Kategori</th>
-                    <th class="py-2 px-4">Dompet</th>
-                    <th class="py-2 px-4 text-center">Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse ($transaksis as $t)
-                    <tr class="border-b hover:bg-gray-50">
-                        <td class="px-4 py-2">{{ $t->keterangan }}</td>
-                        <td class="px-4 py-2">Rp{{ number_format($t->nominal, 0, ',', '.') }}</td>
+    <!-- Filter & Search -->
+    <section class="mt-4">
+        <div
+            class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 bg-white shadow-sm rounded-xl p-4 border">
+            <!-- Filter Dropdowns -->
+            <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
+                <select wire:model.live="filterStatus"
+                    class="border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 w-full sm:w-auto">
+                    <option value="">Semua Status</option>
+                    <option value="Masuk">Masuk</option>
+                    <option value="Keluar">Keluar</option>
+                    <option value="Withdraw">Withdraw</option>
+                </select>
 
-                        <td class="px-4 py-2">
-                            @php
-                                $warnaStatus = match ($t->status) {
-                                    'Masuk' => 'bg-green-100 text-green-700',
-                                    'Keluar' => 'bg-red-100 text-red-700',
-                                    'Withdraw' => 'bg-purple-100 text-purple-700',
-                                    default => 'bg-gray-100 text-gray-700',
-                                };
-                            @endphp
-                            <span class="px-3 py-1 text-sm font-medium rounded-lg {{ $warnaStatus }}">
-                                {{ $t->status }}
-                            </span>
-                        </td>
+                <select wire:model.live="filterTanggal"
+                    class="border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 w-full sm:w-auto">
+                    <option value="">Semua Tanggal</option>
+                    <option value="hari_ini">Hari Ini</option>
+                    <option value="minggu_ini">Minggu Ini</option>
+                    <option value="bulan_ini">Bulan Ini</option>
+                </select>
+            </div>
 
-                        <td class="px-4 py-2">{{ \Carbon\Carbon::parse($t->tanggal)->format('d/m/Y') ?? '-' }}</td>
+            <!-- Search Input -->
+            <div class="relative w-full md:w-1/3">
+                <i class="bi bi-search absolute left-3 top-2.5 text-gray-400"></i>
+                <input type="text" wire:model.live.debounce.300ms="search"
+                    placeholder="Cari keterangan atau nominal..."
+                    class="w-full border rounded-lg pl-10 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+        </div>
+    </section>
 
-                        <td class="px-4 py-2">{{ $t->kategori->nama_kategori ?? '-' }}</td>
-
-                        {{-- Dompet --}}
-                        <td class="px-4 py-2">
-                            @if ($t->status === 'Withdraw')
+    <!-- Table -->
+    <section class="mt-4">
+        <div class="overflow-x-auto bg-white shadow rounded-2xl p-4 border">
+            <table class="min-w-full text-sm text-left text-gray-700">
+                <thead class="border-b text-gray-600 uppercase text-xs">
+                    <tr class="bg-gray-50">
+                        <th class="px-4 py-3 whitespace-nowrap">Keterangan</th>
+                        <th class="px-4 py-3 whitespace-nowrap">Nominal</th>
+                        <th class="px-4 py-3 whitespace-nowrap">Tanggal</th>
+                        <th class="px-4 py-3 whitespace-nowrap">Status</th>
+                        <th class="px-4 py-3 whitespace-nowrap">Kategori</th>
+                        <th class="px-4 py-3 whitespace-nowrap">Dompet</th>
+                        <th class="px-4 py-3 text-center whitespace-nowrap">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($transaksis as $t)
+                        <tr class="border-b hover:bg-gray-50 transition">
+                            <td class="px-4 py-3 font-medium break-words max-w-[150px]">{{ $t->keterangan }}</td>
+                            <td class="px-4 py-3 font-semibold">Rp{{ number_format($t->nominal, 0, ',', '.') }}</td>
+                            <td class="px-4 py-3">{{ \Carbon\Carbon::parse($t->tanggal)->format('d/m/Y') }}</td>
+                            <td class="px-4 py-3">
                                 @php
-                                    $asal = $t->dompetAsal->nama_dompet ?? null;
-                                    $tujuan = $t->dompetTujuan->nama_dompet ?? null;
+                                    $warnaStatus = match ($t->status) {
+                                        'Masuk' => 'bg-green-100 text-green-700',
+                                        'Keluar' => 'bg-red-100 text-red-700',
+                                        'Withdraw' => 'bg-purple-100 text-purple-700',
+                                        default => 'bg-gray-100 text-gray-700',
+                                    };
                                 @endphp
-                                @if ($asal && $tujuan)
-                                    {{ $asal }} <span class="text-gray-400">➜</span> {{ $tujuan }}
-                                @elseif ($asal)
-                                    {{ $asal }}
-                                @elseif ($tujuan)
-                                    {{ $tujuan }}
+                                <span class="px-2 py-1 rounded text-xs font-semibold {{ $warnaStatus }}">
+                                    {{ $t->status }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-3">{{ $t->kategori->nama_kategori ?? '-' }}</td>
+                            <td class="px-4 py-3 whitespace-nowrap">
+                                @if ($t->status === 'Withdraw')
+                                    @php
+                                        $asal = $t->dompetAsal->nama_dompet ?? null;
+                                        $tujuan = $t->dompetTujuan->nama_dompet ?? null;
+                                    @endphp
+                                    @if ($asal && $tujuan)
+                                        {{ $asal }} <span class="text-gray-400">➜</span> {{ $tujuan }}
+                                    @else
+                                        {{ $asal ?? ($tujuan ?? '-') }}
+                                    @endif
                                 @else
-                                    -
+                                    {{ $t->dompetAsal->nama_dompet ?? '-' }}
                                 @endif
-                            @else
-                                {{ $t->dompetAsal->nama_dompet ?? '-' }}
-                            @endif
-                        </td>
+                            </td>
+                            <td class="px-4 py-3 text-center">
+                                <div class="flex justify-center gap-2">
+                                    <button wire:click="edit({{ $t->id }})"
+                                        class="px-3 py-1 bg-sky-500 text-white rounded-lg hover:bg-sky-600 text-xs">
+                                        Edit
+                                    </button>
+                                    <button onclick="confirmDelete({{ $t->id }})"
+                                        class="px-3 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600 text-xs">
+                                        Hapus
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="7" class="text-center py-4 text-gray-500">Belum ada data transaksi.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
 
-                        <td class="px-4 py-2 text-center">
-                            <button wire:click="edit({{ $t->id }})"
-                                class="px-3 py-1 bg-sky-500 text-white rounded-lg hover:bg-sky-600">Edit</button>
-                            <button wire:click="confirmDelete({{ $t->id }})"
-                                class="px-3 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600">Hapus</button>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="7" class="text-center py-4 text-gray-500">
-                            Belum ada data transaksi.
-                        </td>
-                    </tr>
-                @endforelse
+            <div class="mt-4">
+                {{ $transaksis->links() }}
+            </div>
+        </div>
+    </section>
 
-            </tbody>
-        </table>
 
-        <div class="mt-4">{{ $transaksis->links() }}</div>
-    </div>
-
-    {{-- Modal --}}
+    <!-- Modal (Tambah / Edit) -->
     @if ($isModalOpen)
-        <div class="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center z-50">
-            <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-lg">
-                <h2 class="text-xl font-semibold mb-4">
+        <div class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+            <div class="bg-white rounded-2xl shadow-lg p-6 w-[90%] max-w-lg relative animate-fadeIn">
+                <button wire:click="closeModal"
+                    class="absolute top-3 right-3 text-gray-500 hover:text-gray-700">✕</button>
+
+                <h3 class="text-lg font-semibold mb-4 text-gray-800">
                     {{ $isEdit ? 'Edit Transaksi' : 'Tambah Transaksi' }}
-                </h2>
+                </h3>
 
-                <form wire:submit.prevent="store">
-                    <div class="mb-3">
-                        <label class="block text-sm">Keterangan</label>
-                        <input type="text" wire:model="keterangan" class="w-full border rounded p-2">
+                <form wire:submit.prevent="{{ $isEdit ? 'update' : 'store' }}" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Keterangan</label>
+                        <input type="text" wire:model.defer="keterangan"
+                            class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
                         @error('keterangan')
-                            <p class="text-red-500 text-xs">{{ $message }}</p>
+                            <span class="text-red-500 text-sm">{{ $message }}</span>
                         @enderror
                     </div>
 
-                    <div class="mb-3">
-                        <label class="block text-sm">Nominal</label>
-                        <input type="number" wire:model="nominal" class="w-full border rounded p-2">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Nominal</label>
+                        <input type="number" wire:model.defer="nominal"
+                            class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
                         @error('nominal')
-                            <p class="text-red-500 text-xs">{{ $message }}</p>
+                            <span class="text-red-500 text-sm">{{ $message }}</span>
                         @enderror
                     </div>
 
-                    <div class="mb-3">
-                        <label class="block text-sm">Tanggal</label>
-                        <input type="date" wire:model="tanggal" class="w-full border rounded p-2">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Tanggal</label>
+                        <input type="date" wire:model.defer="tanggal"
+                            class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
                         @error('tanggal')
-                            <p class="text-red-500 text-xs">{{ $message }}</p>
+                            <span class="text-red-500 text-sm">{{ $message }}</span>
                         @enderror
                     </div>
 
-
-                    <div class="mb-3">
-                        <label class="block text-sm">Status</label>
-                        <select wire:model.live="status" class="w-full border rounded p-2">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Status</label>
+                        <select wire:model.live="status"
+                            class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
                             <option value="">Pilih Status</option>
                             <option value="Masuk">Masuk</option>
                             <option value="Keluar">Keluar</option>
                             <option value="Withdraw">Withdraw</option>
                         </select>
                         @error('status')
-                            <p class="text-red-500 text-xs">{{ $message }}</p>
+                            <span class="text-red-500 text-sm">{{ $message }}</span>
                         @enderror
                     </div>
 
-                    <div class="mb-3">
-                        <label class="block text-sm">Kategori</label>
-                        <select wire:model="kategori_id" class="w-full border rounded p-2">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Kategori</label>
+                        <select wire:model.defer="kategori_id"
+                            class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
                             <option value="">Pilih Kategori</option>
                             @foreach ($filteredKategoris as $k)
                                 <option value="{{ $k->id }}">{{ $k->nama_kategori }}</option>
                             @endforeach
                         </select>
                         @error('kategori_id')
-                            <p class="text-red-500 text-xs">{{ $message }}</p>
+                            <span class="text-red-500 text-sm">{{ $message }}</span>
                         @enderror
                     </div>
 
                     @if ($status === 'Withdraw')
-                        <div class="mb-3">
-                            <label class="block text-sm">Dompet Asal</label>
-                            <select wire:model="dompet_asal_id" class="w-full border rounded p-2">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Dompet Asal</label>
+                            <select wire:model.defer="dompet_asal_id"
+                                class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
                                 <option value="">Pilih Dompet Asal</option>
                                 @foreach ($dompets as $d)
                                     <option value="{{ $d->id }}">{{ $d->nama_dompet }}</option>
                                 @endforeach
                             </select>
-                            @error('dompet_asal_id')
-                                <p class="text-red-500 text-xs">{{ $message }}</p>
-                            @enderror
                         </div>
-
-                        <div class="mb-3">
-                            <label class="block text-sm">Dompet Tujuan</label>
-                            <select wire:model="dompet_tujuan_id" class="w-full border rounded p-2">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Dompet Tujuan</label>
+                            <select wire:model.defer="dompet_tujuan_id"
+                                class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
                                 <option value="">Pilih Dompet Tujuan</option>
                                 @foreach ($dompets as $d)
                                     <option value="{{ $d->id }}">{{ $d->nama_dompet }}</option>
                                 @endforeach
                             </select>
-                            @error('dompet_tujuan_id')
-                                <p class="text-red-500 text-xs">{{ $message }}</p>
-                            @enderror
                         </div>
                     @else
-                        <div class="mb-3">
-                            <label class="block text-sm">Dompet</label>
-                            <select wire:model="dompet_asal_id" class="w-full border rounded p-2">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Dompet</label>
+                            <select wire:model.defer="dompet_asal_id"
+                                class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
                                 <option value="">Pilih Dompet</option>
                                 @foreach ($dompets as $d)
                                     <option value="{{ $d->id }}">{{ $d->nama_dompet }}</option>
                                 @endforeach
                             </select>
-                            @error('dompet_asal_id')
-                                <p class="text-red-500 text-xs">{{ $message }}</p>
-                            @enderror
                         </div>
                     @endif
 
-                    <div class="flex justify-end mt-4 space-x-2">
+                    <div class="text-end">
                         <button type="button" wire:click="closeModal"
-                            class="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">Batal</button>
-                        <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+                            class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 mr-2">Batal</button>
+                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
                             {{ $isEdit ? 'Update' : 'Simpan' }}
                         </button>
                     </div>
@@ -196,39 +233,38 @@
             </div>
         </div>
     @endif
+</div>
 
+@push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        document.addEventListener('livewire:init', () => {
-            Livewire.on('swal:confirmDelete', ({
-                id
-            }) => {
-                Swal.fire({
-                    title: 'Yakin ingin menghapus?',
-                    text: "Data ini akan dihapus permanen!",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonText: 'Ya, hapus!',
-                    cancelButtonText: 'Batal',
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        Livewire.dispatch('deleteConfirmed', {
-                            id: id
-                        });
-                    }
-                });
+        function confirmDelete(id) {
+            Swal.fire({
+                title: 'Yakin ingin menghapus?',
+                text: "Data transaksi akan dihapus permanen!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Livewire.dispatch('deleteTransaksi', {
+                        id
+                    });
+                }
             });
+        }
 
-            Livewire.on('swal:success', ({
-                message
-            }) => {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Berhasil',
-                    text: message,
-                    timer: 1500,
-                    showConfirmButton: false
-                });
+        Livewire.on('successAlert', (message) => {
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: message,
+                timer: 2000,
+                showConfirmButton: false
             });
         });
     </script>
-</div>
+@endpush

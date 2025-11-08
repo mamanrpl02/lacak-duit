@@ -31,6 +31,7 @@ class TransaksiIndex extends Component
     public function render()
     {
         $transaksis = Transaksi::with(['kategori', 'dompetAsal', 'dompetTujuan'])
+            ->where('user_id', Auth::id()) // hanya transaksi user login
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
@@ -40,6 +41,7 @@ class TransaksiIndex extends Component
             'dompets' => Dompet::all(),
         ]);
     }
+
 
     public function openModal()
     {

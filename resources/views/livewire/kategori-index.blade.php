@@ -23,7 +23,7 @@
                 </div>
 
                 <div class="relative w-full md:w-1/3">
-                    <input type="text" placeholder="Cari kategori..." wire:model.live="search" 
+                    <input type="text" placeholder="Cari kategori..." wire:model.live="search"
                         class="w-full border rounded-lg px-4 py-2 pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
                     <i class="bi bi-search absolute left-3 top-2.5 text-gray-400"></i>
 

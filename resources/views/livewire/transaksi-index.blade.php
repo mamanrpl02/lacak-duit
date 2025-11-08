@@ -1,4 +1,5 @@
 <div class="p-6">
+
     <!-- Header -->
     <section>
         <div class="flex justify-between items-center mb-4">
@@ -16,6 +17,14 @@
             class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 bg-white shadow-sm rounded-xl p-4 border">
             <!-- Filter Dropdowns -->
             <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
+                <select wire:model.live="filterKategori"
+                    class="border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 w-full sm:w-auto">
+                    <option value="">Semua Kategori</option>
+                    @foreach ($kategoris as $k)
+                        <option value="{{ $k->id }}">{{ $k->nama_kategori }}</option>
+                    @endforeach
+                </select>
+
                 <select wire:model.live="filterStatus"
                     class="border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 w-full sm:w-auto">
                     <option value="">Semua Status</option>
@@ -24,13 +33,13 @@
                     <option value="Withdraw">Withdraw</option>
                 </select>
 
-                <select wire:model.live="filterTanggal"
-                    class="border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 w-full sm:w-auto">
-                    <option value="">Semua Tanggal</option>
-                    <option value="hari_ini">Hari Ini</option>
-                    <option value="minggu_ini">Minggu Ini</option>
-                    <option value="bulan_ini">Bulan Ini</option>
-                </select>
+                <input type="date" wire:model.live="filterTanggalAwal"
+                    class="border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 w-full sm:w-auto"
+                    placeholder="Dari Tanggal">
+
+                <input type="date" wire:model.live="filterTanggalAkhir"
+                    class="border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 w-full sm:w-auto"
+                    placeholder="Sampai Tanggal">
             </div>
 
             <!-- Search Input -->
@@ -120,7 +129,6 @@
         </div>
     </section>
 
-
     <!-- Modal (Tambah / Edit) -->
     @if ($isModalOpen)
         <div class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
@@ -132,7 +140,7 @@
                     {{ $isEdit ? 'Edit Transaksi' : 'Tambah Transaksi' }}
                 </h3>
 
-                <form wire:submit.prevent="{{ $isEdit ? 'update' : 'store' }}" class="space-y-4">
+                <form wire:submit.prevent="{{ $isEdit ? 'store' : 'store' }}" class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Keterangan</label>
                         <input type="text" wire:model.defer="keterangan"
@@ -162,7 +170,7 @@
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Status</label>
-                        <select wire:model.live="status"
+                        <select wire:model="status"
                             class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
                             <option value="">Pilih Status</option>
                             <option value="Masuk">Masuk</option>
@@ -233,38 +241,38 @@
             </div>
         </div>
     @endif
+
 </div>
-
 @push('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        function confirmDelete(id) {
-            Swal.fire({
-                title: 'Yakin ingin menghapus?',
-                text: "Data transaksi akan dihapus permanen!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Ya, hapus!',
-                cancelButtonText: 'Batal'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    Livewire.dispatch('deleteTransaksi', {
-                        id
-                    });
-                }
-            });
-        }
-
-        Livewire.on('successAlert', (message) => {
-            Swal.fire({
-                icon: 'success',
-                title: 'Berhasil!',
-                text: message,
-                timer: 2000,
-                showConfirmButton: false
-            });
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    // Konfirmasi hapus
+    function confirmDelete(id) {
+        Swal.fire({
+            title: 'Yakin ingin menghapus?',
+            text: "Data transaksi akan dihapus permanen!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Ya, hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Livewire.dispatch('deleteConfirmed', { id: id });
+            }
         });
-    </script>
+    }
+
+    // ✅ Listener SweetAlert sukses (Livewire v3)
+    Livewire.on('successAlert', ({ message }) => {
+        Swal.fire({
+            icon: 'success',
+            title: 'Berhasil!',
+            text: message,
+            timer: 2000,
+            showConfirmButton: false
+        });
+    });
+</script>
 @endpush

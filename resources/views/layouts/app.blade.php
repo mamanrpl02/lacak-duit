@@ -29,6 +29,8 @@
 
 <body class="bg-gray-50 min-h-screen flex text-gray-800 antialiased">
 
+{{-- <body class="bg-gray-50 min-h-screen flex flex-col lg:flex-row text-gray-800 antialiased"> --}}
+
     <!-- Overlay (untuk mobile & tablet) -->
     <div id="overlay" class="fixed inset-0 bg-black bg-opacity-30 z-40 hidden"></div>
 
@@ -128,7 +130,7 @@
             <!-- Profile -->
             <div class="relative">
                 <button id="profileBtn" class="flex items-center gap-3 hover:bg-gray-100 rounded-full p-2 transition">
-                    <img src="https://i.pravatar.cc/40" alt="profile" class="w-9 h-9 rounded-full" />
+                    <img src="{{ asset('assets/images/avatar.png') }}" alt="profile" class="w-9 h-9 rounded-full" />
                     <i class="bi bi-gear w-5 h-5 text-gray-500"></i>
                 </button>
 

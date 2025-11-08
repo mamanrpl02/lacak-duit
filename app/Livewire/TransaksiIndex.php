@@ -8,6 +8,7 @@ use App\Models\Transaksi;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\On;
 
 class TransaksiIndex extends Component
 {
@@ -17,32 +18,71 @@ class TransaksiIndex extends Component
     public $isModalOpen = false, $isEdit = false, $transaksiId = null;
     public $filteredKategoris = [];
 
-    protected $listeners = ['deleteConfirmed' => 'deleteConfirmed'];
-
-    // reset halaman pagination tiap update
-    protected $updatesQueryString = ['page'];
+    // Filter & Search
+    public $filterKategori = '';
+    public $filterStatus = '';
+    public $filterTanggalAwal = '';
+    public $filterTanggalAkhir = '';
+    public $search = '';
 
     public function mount()
     {
-        // Set kategori awal agar tidak null di Blade
         $this->filteredKategoris = Kategori::all();
     }
 
     public function render()
     {
-        $transaksis = Transaksi::with(['kategori', 'dompetAsal', 'dompetTujuan'])
-            ->where('user_id', Auth::id()) // hanya transaksi user login
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
+        $query = Transaksi::with(['kategori', 'dompetAsal', 'dompetTujuan'])
+            ->where('user_id', Auth::id());
+
+        // Filter kategori
+        if ($this->filterKategori) {
+            $query->where('kategori_id', $this->filterKategori);
+        }
+
+        // Filter status
+        if ($this->filterStatus) {
+            $query->where('status', $this->filterStatus);
+        }
+
+        // Filter tanggal
+        if ($this->filterTanggalAwal && $this->filterTanggalAkhir) {
+            $query->whereBetween('tanggal', [$this->filterTanggalAwal, $this->filterTanggalAkhir]);
+        }
+
+        // Search
+        if ($this->search) {
+            $search = '%' . $this->search . '%';
+            $query->where(function ($q) use ($search) {
+                $q->where('keterangan', 'like', $search)
+                    ->orWhere('nominal', 'like', $search);
+            });
+        }
+
+        $transaksis = $query->latest()->paginate(10);
 
         return view('livewire.transaksi-index', [
             'transaksis' => $transaksis,
-            'kategoris' => Kategori::all(),
             'dompets' => Dompet::all(),
+            'kategoris' => Kategori::all(),
         ]);
     }
 
+    // Reset pagination saat filter/search berubah
+    public function updated($field)
+    {
+        if (in_array($field, [
+            'filterKategori',
+            'filterStatus',
+            'filterTanggalAwal',
+            'filterTanggalAkhir',
+            'search'
+        ])) {
+            $this->resetPage();
+        }
+    }
 
+    // Modal
     public function openModal()
     {
         $this->resetInput();
@@ -57,17 +97,16 @@ class TransaksiIndex extends Component
 
     public function updatedStatus($value)
     {
-        if (in_array($value, ['Masuk', 'Keluar', 'Withdraw'])) {
-            $this->filteredKategoris = Kategori::where('type', $value)->get();
-        } else {
-            $this->filteredKategoris = Kategori::all();
-        }
+        $this->filteredKategoris = $value
+            ? Kategori::where('type', $value)->get()
+            : Kategori::all();
 
-        // Reset kategori_id saat status berubah agar dropdown tidak menampilkan kategori lama
-        $this->kategori_id = '';
+        if (!$this->isEdit) {
+            $this->kategori_id = '';
+        }
     }
 
-
+    // Store / Update
     public function store()
     {
         $this->validate([
@@ -76,21 +115,11 @@ class TransaksiIndex extends Component
             'tanggal' => 'required|date',
             'status' => 'required',
             'kategori_id' => 'required',
+            'dompet_asal_id' => 'required',
         ]);
 
-        if ($this->status === 'Withdraw') {
-            $this->validate([
-                'dompet_asal_id' => 'required',
-                'dompet_tujuan_id' => 'required|different:dompet_asal_id',
-            ]);
-        } else {
-            $this->validate([
-                'dompet_asal_id' => 'required',
-            ]);
-        }
-
         Transaksi::updateOrCreate(
-            ['id' => $this->transaksiId],
+            ['id' => $this->isEdit ? $this->transaksiId : null],
             [
                 'keterangan' => $this->keterangan,
                 'nominal' => $this->nominal,
@@ -99,14 +128,16 @@ class TransaksiIndex extends Component
                 'kategori_id' => $this->kategori_id,
                 'dompet_asal_id' => $this->dompet_asal_id,
                 'dompet_tujuan_id' => $this->status === 'Withdraw' ? $this->dompet_tujuan_id : null,
-                'user_id' => Auth::id(),
             ]
         );
 
-        $msg = $this->isEdit ? 'Data berhasil diupdate!' : 'Data berhasil disimpan!';
-        $this->dispatch('swal:success', message: $msg);
-        $this->closeModal();
+        $msg = $this->isEdit ? 'Data berhasil diperbarui!' : 'Data berhasil disimpan!';
         $this->resetInput();
+        $this->closeModal();
+        $this->resetPage();
+
+        // ✅ Trigger SweetAlert
+        $this->dispatch('successAlert', message: $msg);
     }
 
     public function edit($id)
@@ -122,26 +153,24 @@ class TransaksiIndex extends Component
         $this->dompet_asal_id = $transaksi->dompet_asal_id;
         $this->dompet_tujuan_id = $transaksi->dompet_tujuan_id;
 
-        $this->filteredKategoris = in_array($this->status, ['Masuk', 'Keluar'])
-            ? Kategori::where('type', $this->status)->get()
+        $this->filteredKategoris = $transaksi->status
+            ? Kategori::where('type', $transaksi->status)->get()
             : Kategori::all();
 
         $this->isEdit = true;
         $this->isModalOpen = true;
     }
 
-    public function confirmDelete($id)
-    {
-        $this->dispatch('swal:confirmDelete', id: $id);
-    }
-
+    #[On('deleteConfirmed')]
     public function deleteConfirmed($id)
     {
-        if ($transaksi = Transaksi::find($id)) {
-            $transaksi->delete();
-            $this->dispatch('swal:success', message: 'Data berhasil dihapus!');
-        }
+        $transaksi = Transaksi::findOrFail($id);
+        $transaksi->delete();
+
+        // ✅ Trigger SweetAlert
+        $this->dispatch('successAlert', message: 'Data berhasil dihapus!');
     }
+
 
     private function resetInput()
     {

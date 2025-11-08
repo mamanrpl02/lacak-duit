@@ -14,17 +14,31 @@
         </div>
     </div>
 
-    <!-- Daftar Dompet -->
+    <!-- Filter & Search -->
     <div class="bg-white rounded-xl shadow-sm border p-4 sm:p-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+
+            <!-- Search -->
+            <div class="relative w-full sm:w-1/3">
+                <input type="text" wire:model.live="search" placeholder="Cari dompet berdasarkan nama..."
+                    class="w-full border rounded-lg px-4 py-2 pl-10 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+                <i class="bi bi-search absolute left-3 top-2.5 text-gray-400"></i>
+            </div>
+        </div>
+
+        <!-- Daftar Dompet -->
         <h2 class="text-lg font-semibold text-gray-800 mb-4">Daftar Dompet</h2>
 
         @if ($dompets->count() > 0)
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 @foreach ($dompets as $dompet)
-                    <div class="border rounded-xl p-4 hover:shadow-md transition bg-gray-50 flex flex-col justify-between">
+                    <div
+                        class="border rounded-xl p-4 hover:shadow-md transition bg-gray-50 flex flex-col justify-between space-y-3">
                         <div>
                             <h3 class="font-semibold text-gray-800 text-base mb-1">{{ $dompet->nama_dompet }}</h3>
-                            <p class="text-gray-600 text-sm mb-3 break-words">{{ $dompet->keterangan }}</p>
+                            <p class="text-gray-600 text-sm mb-3 break-words">
+                                {{ $dompet->keterangan ?: '-' }}
+                            </p>
                         </div>
                         <div class="flex flex-wrap gap-2 mt-auto">
                             <button wire:click="edit({{ $dompet->id }})"
@@ -40,7 +54,7 @@
                 @endforeach
             </div>
         @else
-            <p class="text-gray-500 text-center py-6">Belum ada dompet yang ditambahkan.</p>
+            <p class="text-gray-500 text-center py-6">Tidak ditemukan dompet yang sesuai.</p>
         @endif
 
         <div class="mt-4">
@@ -109,5 +123,4 @@
             animation: fadeIn 0.2s ease-out;
         }
     </style>
-
 </div>

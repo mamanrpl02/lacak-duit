@@ -13,6 +13,9 @@ class DompetIndex extends Component
 
     public $nama_dompet, $keterangan, $dompet_id;
     public $isModalOpen = false;
+    public $search = '';
+    public $filter = '';
+
 
     protected $rules = [
         'nama_dompet' => 'required|string|max:255',
@@ -21,13 +24,20 @@ class DompetIndex extends Component
 
     public function render()
     {
-        return view('livewire.dompet-index', [
-            // ✅ hanya tampilkan dompet milik user yang sedang login
-            'dompets' => Dompet::where('user_id', Auth::id())
-                ->latest()
-                ->paginate(10),
-        ]);
+        // Query hanya untuk dompet milik user yang sedang login
+        $query = Dompet::where('user_id', Auth::id());
+
+        // 🔍 Search
+        if ($this->search) {
+            $query->where('nama_dompet', 'like', '%' . $this->search . '%');
+        }
+
+        // 📦 Ambil data terbaru dan pagination
+        $dompets = $query->latest()->paginate(9);
+
+        return view('livewire.dompet-index', compact('dompets'));
     }
+
 
     public function openModal()
     {

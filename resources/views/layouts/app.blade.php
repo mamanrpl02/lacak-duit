@@ -438,9 +438,9 @@
 
         <!-- Footer -->
         <footer class="text-center text-sm text-gray-500 mt-10 mb-4">
-            Dukung Lacak Duit melalui
-            <a href="https://saweria.co/namakamu" target="_blank" class="text-blue-500 hover:underline">
-                tautan ini
+            Dukung <b>Lacak Duit</b> melalui
+            <a href="https://saweria.co/manzweb" target="_blank" class="text-blue-500 hover:underline">
+                klik tautan di sini.
             </a>.
         </footer>
     </div>

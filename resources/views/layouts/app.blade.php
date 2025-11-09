@@ -25,11 +25,290 @@
             transition: all 0.3s ease-in-out;
         }
     </style>
+
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
 </head>
 
 <body class="bg-gray-50 min-h-screen flex text-gray-800 antialiased">
 
-{{-- <body class="bg-gray-50 min-h-screen flex flex-col lg:flex-row text-gray-800 antialiased"> --}}
+
+    @if (isset($showSetupModal) && $showSetupModal)
+        <div id="setupModal"
+            class="fixed inset-0 bg-black/20 flex items-center justify-center z-50 transition-opacity duration-300">
+            <div class="bg-white rounded-2xl p-6 w-[90%] max-w-md relative shadow-lg animate-fade-in">
+                <button onclick="closeModal()"
+                    class="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-xl">✕</button>
+
+                {{-- STEP KATEGORI --}}
+                <div id="stepKategori" style="{{ !$hasKategori ? 'display:block;' : 'display:none;' }}">
+                    <h3 class="text-xl font-bold mb-3 text-green-700">Pilih kategori pertamamu 🌟</h3>
+                    <p class="mb-4 text-gray-600">
+                        Kategori membantu kamu mencatat <b>pemasukan</b>, <b>pengeluaran</b>, dan <b>penarikan saldo</b>
+                        agar catatan keuangan tetap rapi dan mudah dipahami.
+                    </p>
+
+                    <div id="kategoriContainer" class="grid grid-cols-2 gap-2 mb-3">
+                        @php
+                            $defaultKategori = [
+                                ['nama' => 'Makanan', 'type' => 'Keluar'],
+                                ['nama' => 'Minuman', 'type' => 'Keluar'],
+                                ['nama' => 'Transportasi', 'type' => 'Keluar'],
+                                ['nama' => 'Belanja', 'type' => 'Keluar'],
+                                ['nama' => 'Gaji', 'type' => 'Masuk'],
+                                ['nama' => 'Bonus', 'type' => 'Masuk'],
+                            ];
+
+                            $colorMap = [
+                                'Masuk' => '#bbf7d0', // hijau muda
+                                'Keluar' => '#fecaca', // merah muda
+                                'Withdraw' => '#e9d5ff', // ungu muda
+                            ];
+                        @endphp
+
+                        @foreach ($defaultKategori as $kat)
+                            <div class="kategori-item border rounded-lg px-3 py-2 cursor-pointer transition"
+                                data-value="{{ $kat['nama'] }}" data-type="{{ $kat['type'] }}"
+                                data-color="{{ $colorMap[$kat['type']] }}"
+                                style="border-color:#999;background-color:#fff;">
+                                {{ $kat['nama'] }} ({{ $kat['type'] }})
+                            </div>
+                        @endforeach
+                    </div>
+
+                    <div class="mb-2 flex gap-2">
+                        <input type="text" id="kategoriLain" placeholder="Buat kategori baru..."
+                            class="flex-1 border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500">
+                        <select id="kategoriType" class="border rounded-lg px-2 py-2">
+                            <option value="Masuk">Masuk</option>
+                            <option value="Keluar">Keluar</option>
+                            <option value="Withdraw">Withdraw</option>
+                        </select>
+                    </div>
+
+                    <div class="flex justify-between gap-2">
+                        <button id="tambahKategori"
+                            class="flex-1 px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition">
+                            Tambah Kategori
+                        </button>
+                        <button id="selesaiKategori"
+                            class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+                            Selesai
+                        </button>
+                    </div>
+                </div>
+
+                {{-- STEP DOMPET --}}
+                <div id="stepDompet" style="{{ $hasKategori && !$hasDompet ? 'display:block;' : 'display:none;' }}">
+                    <h3 class="text-xl font-bold mb-3 text-blue-700">Buat dompet pertamamu 💰</h3>
+                    <p class="mb-4 text-gray-600">
+                        Dompet berfungsi sebagai tempat menyimpan catatan keuangan kamu.
+                        Kamu bisa menambah lebih dari satu dompet, misalnya:
+                        <b>Dompet Utama</b>, <b>Tabungan</b>, atau <b>Saldo E-Wallet</b>.
+                    </p>
+
+                    <form id="formDompet">
+                        @csrf
+                        <input type="text" id="namaDompet" name="nama_dompet" placeholder="Contoh: Dompet Utama"
+                            class="w-full border rounded-lg px-3 py-2 mb-3 focus:ring-2 focus:ring-blue-500" required>
+
+                        <div class="flex gap-2">
+                            <button type="button" id="tambahDompet"
+                                class="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
+                                + Tambah Dompet Lagi
+                            </button>
+                            <button type="submit"
+                                class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                                Selesai
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+        <script>
+            function closeModal() {
+                document.getElementById('setupModal').style.display = 'none';
+            }
+
+            // --- PILIH kategori ---
+            function toggleKategori(item) {
+                const color = item.dataset.color;
+                if (item.classList.contains('selected')) {
+                    item.classList.remove('selected');
+                    item.style.backgroundColor = '#fff';
+                } else {
+                    item.classList.add('selected');
+                    item.style.backgroundColor = color;
+                }
+            }
+
+            document.querySelectorAll('.kategori-item').forEach(item =>
+                item.addEventListener('click', () => toggleKategori(item))
+            );
+
+            // --- TAMBAH kategori baru ---
+            document.getElementById('tambahKategori')?.addEventListener('click', () => {
+                const input = document.getElementById('kategoriLain');
+                const type = document.getElementById('kategoriType').value;
+                const value = input.value.trim();
+                if (!value) return;
+
+                const colorMap = {
+                    'Masuk': '#bbf7d0',
+                    'Keluar': '#fecaca',
+                    'Withdraw': '#e9d5ff'
+                };
+
+                const container = document.getElementById('kategoriContainer');
+                const div = document.createElement('div');
+                div.className = 'kategori-item border rounded-lg px-3 py-2 cursor-pointer transition selected';
+                div.dataset.value = value;
+                div.dataset.type = type;
+                div.dataset.color = colorMap[type];
+                div.style.backgroundColor = colorMap[type];
+                div.style.borderColor = '#999';
+                div.innerText = `${value} (${type})`;
+                div.addEventListener('click', () => toggleKategori(div));
+                container.appendChild(div);
+                input.value = '';
+            });
+
+            // --- SELESAI kategori ---
+            document.getElementById('selesaiKategori')?.addEventListener('click', async () => {
+                const selected = Array.from(document.querySelectorAll('.kategori-item.selected')).map(el => ({
+                    nama: el.dataset.value,
+                    type: el.dataset.type
+                }));
+
+                if (selected.length === 0) {
+                    Swal.fire('Peringatan', 'Pilih minimal satu kategori!', 'warning');
+                    return;
+                }
+
+                try {
+                    const res = await fetch("{{ route('setup.kategori') }}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({
+                            kategori: selected
+                        })
+                    });
+
+                    const data = await res.json();
+                    if (data.success) {
+                        Swal.fire('Berhasil!', data.message, 'success').then(() => {
+                            document.getElementById('stepKategori').style.display = 'none';
+                            document.getElementById('stepDompet').style.display = 'block';
+                        });
+                    } else {
+                        Swal.fire('Gagal!', data.message, 'error');
+                    }
+                } catch (err) {
+                    Swal.fire('Gagal!', 'Terjadi kesalahan saat menyimpan kategori.', 'error');
+                }
+            });
+
+            // --- SIMPAN & TAMBAH dompet ---
+            document.getElementById('tambahDompet')?.addEventListener('click', async function() {
+                const namaDompet = document.getElementById('namaDompet').value.trim();
+                if (!namaDompet) {
+                    Swal.fire('Peringatan', 'Nama dompet tidak boleh kosong!', 'warning');
+                    return;
+                }
+
+                try {
+                    const res = await fetch("{{ route('setup.dompet') }}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({
+                            nama_dompet: namaDompet
+                        })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        Swal.fire('Berhasil!', 'Dompet berhasil ditambahkan.', 'success');
+                        document.getElementById('namaDompet').value = '';
+                    } else {
+                        Swal.fire('Gagal!', data.message, 'error');
+                    }
+                } catch {
+                    Swal.fire('Gagal!', 'Terjadi kesalahan saat menambah dompet.', 'error');
+                }
+            });
+
+            document.getElementById('formDompet')?.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const namaDompet = document.getElementById('namaDompet').value.trim();
+
+                if (!namaDompet) {
+                    Swal.fire('Peringatan', 'Nama dompet tidak boleh kosong!', 'warning');
+                    return;
+                }
+
+                try {
+                    const res = await fetch("{{ route('setup.dompet') }}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({
+                            nama_dompet: namaDompet
+                        })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        Swal.fire('Selesai!', 'Semua setup awal berhasil disimpan.', 'success').then(() => {
+                            closeModal();
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire('Gagal!', data.message, 'error');
+                    }
+                } catch {
+                    Swal.fire('Gagal!', 'Terjadi kesalahan saat menyimpan dompet.', 'error');
+                }
+            });
+        </script>
+
+        <style>
+            @keyframes fade-in {
+                from {
+                    opacity: 0;
+                    transform: scale(0.95);
+                }
+
+                to {
+                    opacity: 1;
+                    transform: scale(1);
+                }
+            }
+
+            .animate-fade-in {
+                animation: fade-in 0.3s ease-out forwards;
+            }
+
+            .kategori-item {
+                transition: all 0.3s ease;
+            }
+
+            .kategori-item.selected {
+                border-color: #22c55e;
+            }
+        </style>
+    @endif
+
+
 
     <!-- Overlay (untuk mobile & tablet) -->
     <div id="overlay" class="fixed inset-0 bg-black bg-opacity-30 z-40 hidden"></div>
@@ -93,7 +372,8 @@
             <p>© 2025 LacakDuit</p>
             <p>
                 by
-                <a class="underline text-sky-400" href="http://manzweb.my.id" target="_blank" rel="noopener noreferrer">
+                <a class="underline text-sky-400" href="http://manzweb.my.id" target="_blank"
+                    rel="noopener noreferrer">
                     manzweb.my.id
                 </a>
             </p>
@@ -130,13 +410,15 @@
             <!-- Profile -->
             <div class="relative">
                 <button id="profileBtn" class="flex items-center gap-3 hover:bg-gray-100 rounded-full p-2 transition">
-                    <img src="{{ asset('assets/images/avatar.png') }}" alt="profile" class="w-9 h-9 rounded-full" />
+                    <img src="{{ asset('assets/images/avatar.png') }}" alt="profile"
+                        class="w-9 h-9 rounded-full" />
                     <i class="bi bi-gear w-5 h-5 text-gray-500"></i>
                 </button>
 
                 <div id="dropdownMenu"
                     class="hidden absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-lg border p-2 text-sm">
-                    <a href="{{ route('profile.edit') }}" class="block px-3 py-2 hover:bg-gray-100 rounded">Profil</a>
+                    <a href="{{ route('profile.edit') }}"
+                        class="block px-3 py-2 hover:bg-gray-100 rounded">Profil</a>
                     <hr class="my-1" />
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
@@ -162,6 +444,9 @@
             </a>.
         </footer>
     </div>
+
+
+
 
     <!-- Script Sidebar -->
     <script>

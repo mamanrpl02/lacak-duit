@@ -23,13 +23,32 @@ class Dashboard extends Component
 
     public $chartData = [];
     public $kategoriChart = [];
+    public $showSetupModal = false;
+
 
     public function mount()
     {
         $this->tanggal_dari = now()->startOfMonth()->format('Y-m-d');
         $this->tanggal_sampai = now()->endOfMonth()->format('Y-m-d');
+
+        $userId = Auth::id();
+
+        // Cek apakah user punya dompet & kategori
+        $hasDompet = Dompet::where('user_id', $userId)->exists();
+        $hasKategori = Kategori::where('user_id', $userId)->exists();
+
+        if (!$hasDompet || !$hasKategori) {
+            $this->showSetupModal = true;
+        }
+
         $this->loadData();
     }
+
+    public function closeModal()
+    {
+        $this->showSetupModal = false;
+    }
+
 
     public function updated($property)
     {

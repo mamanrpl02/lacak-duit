@@ -1,16 +1,18 @@
 <?php
 
 use App\Models\User;
+use App\Livewire\Dashboard;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 use Laravel\Socialite\Facades\Socialite;
+use App\Http\Controllers\SetupController;
+use App\Http\Controllers\DompetController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
-use App\Livewire\Dashboard;
-use App\Http\Controllers\ProfileController;
 
 
 
@@ -55,6 +57,11 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/dashboard/chart-data', [DashboardController::class, 'chartData'])->name('dashboard.chart-data');
 
+    Route::post('/setup/kategori', [SetupController::class, 'storeKategori'])->name('setup.kategori');
+    Route::post('/setup/dompet', [SetupController::class, 'storeDompet'])->name('setup.dompet');
+
+    // Cek apakah user punya dompet (untuk setup modal)
+    Route::get('/dompet/check', [DompetController::class, 'check'])->name('dompet.check');
 
     // Profile
     Route::view('/profile', 'profile')->name('profile.edit');

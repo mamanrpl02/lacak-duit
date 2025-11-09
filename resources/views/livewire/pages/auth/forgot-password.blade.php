@@ -28,7 +28,7 @@ new #[Layout('layouts.guest')] class extends Component {
 <div class="min-h-screen flex items-center justify-center bg-blue-50 p-6">
     <div class="bg-white shadow-lg rounded-2xl overflow-hidden w-full max-w-5xl flex flex-col md:flex-row">
 
-        <!-- Sisi Kiri - Gambar + Overlay -->
+        <!-- Gambar Kiri -->
         <div class="hidden md:flex relative w-1/2 bg-cover bg-center"
             style="background-image: url('https://images.pexels.com/photos/10774600/pexels-photo-10774600.jpeg');">
             <div class="absolute inset-0 bg-blue-900/60"></div>
@@ -41,17 +41,16 @@ new #[Layout('layouts.guest')] class extends Component {
             </div>
         </div>
 
-        <!-- Sisi Kanan - Form -->
+        <!-- Form -->
         <div class="p-8 md:w-1/2 flex flex-col justify-center space-y-6 bg-white w-full md:max-w-md mx-auto">
             <div class="text-center">
                 <h2 class="text-2xl font-semibold text-blue-600">Atur Ulang Kata Sandi</h2>
                 <p class="text-sm text-gray-500 mt-1">Masukkan email Anda untuk menerima tautan reset password</p>
             </div>
 
-            <!-- Session Status -->
             <x-auth-session-status class="mb-4" :status="session('status')" />
 
-            <form wire:submit="sendPasswordResetLink" class="space-y-4">
+            <form wire:submit.prevent="sendPasswordResetLink" class="space-y-4">
                 <div>
                     <x-input-label for="email" value="Email" />
                     <x-text-input wire:model="email" id="email" type="email"
@@ -60,10 +59,21 @@ new #[Layout('layouts.guest')] class extends Component {
                     <x-input-error :messages="$errors->get('email')" class="mt-2" />
                 </div>
 
-                <x-primary-button
-                    class="w-full justify-center py-3 rounded-xl text-base font-medium mt-3 bg-blue-600 hover:bg-blue-700">
-                    Kirim Tautan Reset Password
-                </x-primary-button>
+                <button type="submit" wire:loading.attr="disabled"
+                    class="w-full justify-center py-3 rounded-xl text-base font-medium mt-3 bg-blue-600 hover:bg-blue-700 text-white flex items-center">
+                    <span wire:loading.remove>Kirim Tautan Reset Password</span>
+                    <span wire:loading class="flex items-center gap-2">
+                        <svg class="w-5 h-5 animate-spin text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
+                            viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                stroke-width="4">
+                            </circle>
+                            <path class="opacity-75" fill="currentColor"
+                                d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 100 16v-4l3 3-3 3v-4a8 8 0 01-8-8z">
+                            </path>
+                        </svg>
+                    </span>
+                </button>
             </form>
 
             <p class="text-center text-sm text-gray-500 mt-6">
@@ -74,3 +84,18 @@ new #[Layout('layouts.guest')] class extends Component {
         </div>
     </div>
 </div>
+
+<!-- Tambahkan ini di bawah -->
+@push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        Livewire.on('reset-link-sent', () => {
+            Swal.fire({
+                icon: 'success',
+                title: 'Email Terkirim!',
+                text: 'Tautan reset kata sandi telah dikirim ke email Anda.',
+                confirmButtonColor: '#2563eb'
+            })
+        })
+    </script>
+@endpush

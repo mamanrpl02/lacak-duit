@@ -47,7 +47,7 @@ Route::get('/auth/google/callback', function () {
 
 
 // Semua halaman di bawah hanya bisa diakses oleh user login
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
 
 
     // Dashboard

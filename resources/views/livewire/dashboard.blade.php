@@ -10,8 +10,8 @@
             <input type="date" wire:model.lazy="tanggal_dari" class="border rounded-lg px-3 py-2 text-sm">
             <span class="text-gray-500">sampai</span>
             <input type="date" wire:model.lazy="tanggal_sampai" class="border rounded-lg px-3 py-2 text-sm">
-            <select wire:model.lazy="dompet_id" class="border rounded-lg px-3 py-2 text-sm">
-                <option value="">Semua Dompet</option>
+            <select wire:model.lazy="dompet_id" class="border rounded-lg px-3 pr-9   py-2 text-sm">
+                <option value="">Semua</option>
                 @foreach ($dompetList as $id => $nama)
                     <option value="{{ (int) $id }}">{{ $nama }}</option>
                 @endforeach

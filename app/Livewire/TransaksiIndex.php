@@ -31,7 +31,9 @@ class TransaksiIndex extends Component
     public function updatedStatus($value)
     {
         if ($value) {
-            $this->filteredKategoris = Kategori::where('type', $value)->get();
+            $this->filteredKategoris = Kategori::where('user_id', Auth::id())
+                ->where('type', $value)
+                ->get();
         } else {
             $this->filteredKategoris = collect();
         }
@@ -42,19 +44,23 @@ class TransaksiIndex extends Component
         $this->dompet_tujuan_id = null;
     }
 
-    // ✅ Load data awal
+    // ✅ Load data awal berdasarkan user login
     public function mount()
     {
-        $this->kategoris = Kategori::all();
-        $this->dompets = Dompet::all();
+        $userId = Auth::id();
+
+        $this->kategoris = Kategori::where('user_id', $userId)->get();
+        $this->dompets = Dompet::where('user_id', $userId)->get();
         $this->filteredKategoris = collect(); // kosong dulu
     }
 
     // ✅ Render halaman
     public function render()
     {
+        $userId = Auth::id();
+
         $query = Transaksi::with(['kategori', 'dompetAsal', 'dompetTujuan'])
-            ->where('user_id', Auth::id());
+            ->where('user_id', $userId);
 
         // Filter kategori
         if ($this->filterKategori) {
@@ -116,7 +122,7 @@ class TransaksiIndex extends Component
         $this->isModalOpen = false;
     }
 
-    // ✅ Store / Update
+    // ✅ Store / Update (berdasarkan user login)
     public function store()
     {
         $this->validate([
@@ -126,13 +132,14 @@ class TransaksiIndex extends Component
             'status' => 'required',
             'kategori_id' => 'required',
             'dompet_asal_id' => 'required',
-            // dompet_tujuan_id hanya wajib jika status withdraw
         ]);
+
+        $userId = Auth::id();
 
         Transaksi::updateOrCreate(
             ['id' => $this->isEdit ? $this->transaksiId : null],
             [
-                'user_id' => Auth::id(),
+                'user_id' => $userId,
                 'keterangan' => $this->keterangan,
                 'nominal' => $this->nominal,
                 'tanggal' => $this->tanggal,
@@ -149,14 +156,13 @@ class TransaksiIndex extends Component
         $this->closeModal();
         $this->resetPage();
 
-        // ✅ Trigger SweetAlert
         $this->dispatch('successAlert', message: $msg);
     }
 
-    // ✅ Edit data
+    // ✅ Edit data (hanya milik user login)
     public function edit($id)
     {
-        $transaksi = Transaksi::findOrFail($id);
+        $transaksi = Transaksi::where('user_id', Auth::id())->findOrFail($id);
 
         $this->transaksiId = $id;
         $this->keterangan = $transaksi->keterangan;
@@ -167,23 +173,21 @@ class TransaksiIndex extends Component
         $this->dompet_asal_id = $transaksi->dompet_asal_id;
         $this->dompet_tujuan_id = $transaksi->dompet_tujuan_id;
 
-        // ✅ Filter kategori sesuai status saat edit
         $this->filteredKategoris = $transaksi->status
-            ? Kategori::where('type', $transaksi->status)->get()
+            ? Kategori::where('user_id', Auth::id())->where('type', $transaksi->status)->get()
             : collect();
 
         $this->isEdit = true;
         $this->isModalOpen = true;
     }
 
-    // ✅ Hapus data
+    // ✅ Hapus data (hanya milik user login)
     #[On('deleteConfirmed')]
     public function deleteConfirmed($id)
     {
-        $transaksi = Transaksi::findOrFail($id);
+        $transaksi = Transaksi::where('user_id', Auth::id())->findOrFail($id);
         $transaksi->delete();
 
-        // ✅ Trigger SweetAlert
         $this->dispatch('successAlert', message: 'Data berhasil dihapus!');
     }
 

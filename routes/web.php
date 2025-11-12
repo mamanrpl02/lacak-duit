@@ -26,24 +26,46 @@ Route::get('/auth/google/redirect', function () {
         ->redirect();
 });
 
+// Halaman utama
+Route::view('/', 'welcome');
+
+// Google Login
+Route::get('/auth/google/redirect', function () {
+    return Socialite::driver('google')
+        ->with(['prompt' => 'select_account'])
+        ->redirect();
+});
+
 Route::get('/auth/google/callback', function () {
     $googleUser = Socialite::driver('google')->user();
 
-    $user = User::updateOrCreate([
-        'google_id' => $googleUser->id,
-        'email' => $googleUser->email,
-    ], [
-        'name' => $googleUser->name,
-        'google_token' => $googleUser->token,
-        'google_refresh_token' => $googleUser->refreshToken,
-        'password' => Hash::make('password')
-    ]);
+    // Cari user berdasarkan email
+    $user = User::where('email', $googleUser->email)->first();
 
+    if ($user) {
+        // Jika user sudah ada → update data google_id & token
+        $user->update([
+            'google_id' => $googleUser->id,
+            'google_token' => $googleUser->token,
+            'google_refresh_token' => $googleUser->refreshToken,
+        ]);
+    } else {
+        // Jika belum ada → buat user baru
+        $user = User::create([
+            'google_id' => $googleUser->id,
+            'email' => $googleUser->email,
+            'name' => $googleUser->name,
+            'google_token' => $googleUser->token,
+            'google_refresh_token' => $googleUser->refreshToken,
+            'password' => Hash::make('password'),
+        ]);
+    }
+
+    // Login user
     Auth::login($user);
 
     return redirect()->route('dashboard');
 });
-
 
 
 // Semua halaman di bawah hanya bisa diakses oleh user login

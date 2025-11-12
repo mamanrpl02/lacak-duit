@@ -67,7 +67,7 @@ new #[Layout('layouts.guest')] class extends Component
                 <x-primary-button
                     wire:click="sendVerification"
                     class="w-full justify-center py-3 rounded-xl text-base font-medium bg-blue-600 hover:bg-blue-700 transition-all duration-200">
-                    Kirim Ulang Tautan Verifikasi
+                    Kirim Tautan Verifikasi
                 </x-primary-button>
 
                 <button wire:click="logout"

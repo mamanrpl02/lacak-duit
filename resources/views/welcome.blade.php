@@ -23,7 +23,7 @@
     <meta property="og:type" content="website" />
 
     <!-- ✅ Favicon -->
-    <link rel="icon" href="{{ asset('assets/images/logo-noname.png') }}">
+    <link rel="icon" href="assets/image/logo-noname.png">
 
     <!-- ✅ Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -80,7 +80,7 @@
     <!-- Navbar -->
     <header class="fixed top-0 w-full bg-white/80 backdrop-blur-lg shadow-sm z-50 animate-fadeIn">
         <div class="max-w-6xl mx-auto flex items-center justify-between px-6 py-4">
-            <h1 class="text-2xl font-bold text-emerald-600">LacakDuit</h1>
+            <a href="#" class="text-2xl font-bold text-emerald-600">LacakDuit</a>
             <nav class="hidden md:flex space-x-8 font-medium">
                 <a href="#fitur" class="hover:text-emerald-600">Fitur</a>
                 <a href="#screenshot" class="hover:text-emerald-600">Tampilan</a>
@@ -203,8 +203,11 @@
                 </details>
                 <details class="bg-white p-5 rounded-xl shadow-sm animate-fadeInUp animate-delay-1">
                     <summary class="font-semibold text-emerald-700 cursor-pointer">Apakah data saya aman?</summary>
-                    <p class="mt-3 text-gray-600">Tentu! Semua data tersimpan dengan enkripsi dan hanya bisa diakses
-                        oleh kamu sendiri.</p>
+                    <p class="mt-3 text-gray-600">
+                        Ya, aman digunakan 👍 <strong>Lacak Duit</strong> tidak menyimpan data sensitif pengguna.
+                        Semua data keuangan hanya berupa catatan umum seperti pemasukan, pengeluaran, dan saldo dompet,
+                        sedangkan kata sandi kamu dilindungi dengan enkripsi.
+                    </p>
                 </details>
                 <details class="bg-white p-5 rounded-xl shadow-sm animate-fadeInUp animate-delay-2">
                     <summary class="font-semibold text-emerald-700 cursor-pointer">Apakah bisa digunakan di HP?
@@ -212,12 +215,21 @@
                     <p class="mt-3 text-gray-600">Bisa banget! LacakDuit sudah dioptimalkan agar tampil sempurna di
                         layar smartphone.</p>
                 </details>
-                <details class="bg-white p-5 rounded-xl shadow-sm animate-fadeInUp animate-delay-3">
-                    <summary class="font-semibold text-emerald-700 cursor-pointer">Apakah saya bisa ekspor laporan ke
-                        Excel?</summary>
-                    <p class="mt-3 text-gray-600">Ya! Kamu bisa unduh laporan transaksi ke format Excel atau PDF untuk
-                        arsip.</p>
-                </details>
+                <details class="bg-white p-5 rounded-xl shadow-sm animate-fadeInUp animate-delay-5">
+    <summary class="font-semibold text-emerald-700 cursor-pointer">Apakah ada fitur pengingat harian, target tabungan, atau catatan utang?</summary>
+    <p class="mt-3 text-gray-600">
+        Saat ini fitur seperti pengingat rekap harian, target tabungan bulanan (to-do list), serta pencatatan utang dan piutang masih dalam tahap pengembangan.
+        Nantinya, semua fitur ini akan membantu kamu memantau keuangan lebih detail dan teratur setiap hari.
+    </p>
+</details>
+
+<details class="bg-white p-5 rounded-xl shadow-sm animate-fadeInUp animate-delay-7">
+    <summary class="font-semibold text-emerald-700 cursor-pointer">Apakah ada versi premium?</summary>
+    <p class="mt-3 text-gray-600">
+                Belum ada rencana untuk fitur premium atau berbayar. Saat ini, LacakDuit sepenuhnya gratis dan fokus menghadirkan pengalaman terbaik untuk mengatur keuangan pribadi anda.
+    </p>
+</details>
+
             </div>
         </div>
     </section>
@@ -234,7 +246,7 @@
 
     <!-- Footer -->
     <footer class="py-8 text-center text-sm text-gray-500 bg-gray-50 animate-fadeIn">
-        © 2025 LacakDuit. Dibuat dengan 💚 oleh Mamman.
+        © 2025 LacakDuit. Dibuat dengan 💚 oleh <a href="https://manzweb.my.id">Maman</a>.
     </footer>
 
 </body>

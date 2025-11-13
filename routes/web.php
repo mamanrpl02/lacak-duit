@@ -15,9 +15,9 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 
 
-
-// Halaman utama
-Route::view('/', 'welcome');
+// Halaman utama diarahkan ke login
+Route::redirect('/', '/login');
+    
 
 // Google Login
 Route::get('/auth/google/redirect', function () {
@@ -25,9 +25,6 @@ Route::get('/auth/google/redirect', function () {
         ->with(['prompt' => 'select_account'])
         ->redirect();
 });
-
-// Halaman utama
-Route::view('/', 'welcome');
 
 // Google Login
 Route::get('/auth/google/redirect', function () {

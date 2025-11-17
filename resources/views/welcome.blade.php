@@ -11,19 +11,19 @@
         content="LacakDuit membantu kamu mengatur keuangan harian dengan mudah. Catat pengeluaran, kelola dompet, dan pantau laporan keuanganmu kapan saja!">
     <meta name="keywords"
         content="LacakDuit, aplikasi keuangan, catatan keuangan, dompet digital, manajemen uang, keuangan pribadi, tabungan, keuangan harian">
-    <meta name="author" content="Mamman">
+    <meta name="author" content="Maman">
     <meta name="robots" content="index, follow">
 
     <!-- ✅ Open Graph (untuk dibagikan di WhatsApp, Instagram, Facebook, dll) -->
     <meta property="og:title" content="Lacak Duit - Aplikasi Keuangan Pribadi Modern" />
     <meta property="og:description"
         content="Catat pengeluaran, kelola dompet, dan lihat laporan keuangan dengan mudah lewat LacakDuit. Gratis & modern!" />
-    <meta property="og:image" content="https://i.imgur.com/4U3EvK7.png" />
+    {{-- <meta property="og:image" content="https://i.imgur.com/4U3EvK7.png" /> --}}
     <meta property="og:url" content="https://lacakduit.manzweb.my.id" />
     <meta property="og:type" content="website" />
 
     <!-- ✅ Favicon -->
-    <link rel="icon" href="assets/image/logo-noname.png">
+    <link rel="icon" href="{{ asset('assets/image/logo-noname.png') }}">
 
     <!-- ✅ Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>

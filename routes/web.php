@@ -17,7 +17,7 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 
 // Halaman utama diarahkan ke login
 Route::redirect('/', '/login');
-    
+
 
 // Google Login
 Route::get('/auth/google/redirect', function () {
@@ -25,13 +25,7 @@ Route::get('/auth/google/redirect', function () {
         ->with(['prompt' => 'select_account'])
         ->redirect();
 });
-
-// Google Login
-Route::get('/auth/google/redirect', function () {
-    return Socialite::driver('google')
-        ->with(['prompt' => 'select_account'])
-        ->redirect();
-});
+ 
 
 Route::get('/auth/google/callback', function () {
     $googleUser = Socialite::driver('google')->user();

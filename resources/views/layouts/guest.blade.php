@@ -17,6 +17,9 @@
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 
+    <link rel="icon" href="{{ asset('assets/image/logo-noname.png') }}">
+
+
 </head>
 
 <body class="font-sans text-gray-900 antialiased">

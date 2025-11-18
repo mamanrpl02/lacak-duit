@@ -6,8 +6,7 @@ use Illuminate\Support\Facades\Session;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
 
-new #[Layout('layouts.guest')] class extends Component
-{
+new #[Layout('layouts.guest')] class extends Component {
     /**
      * Kirim ulang tautan verifikasi email.
      */
@@ -32,16 +31,16 @@ new #[Layout('layouts.guest')] class extends Component
     }
 }; ?>
 
-<div class="min-h-screen flex items-center justify-center bg-blue-50 p-6">
+<div class="min-h-screen flex items-center justify-center bg-green-50 p-6">
     <div class="bg-white shadow-lg rounded-2xl overflow-hidden w-full max-w-5xl flex flex-col md:flex-row">
 
         <!-- Kiri: Gambar + Overlay -->
         <div class="hidden md:flex relative w-1/2 bg-cover bg-center"
             style="background-image: url('https://images.pexels.com/photos/1181341/pexels-photo-1181341.jpeg');">
-            <div class="absolute inset-0 bg-blue-900/60"></div>
+            <div class="absolute inset-0 bg-green-900/60"></div>
             <div class="relative z-10 flex flex-col justify-center text-white p-10">
                 <h1 class="text-3xl font-bold mb-4">Verifikasi Email Anda</h1>
-                <p class="text-blue-100 text-lg leading-relaxed">
+                <p class="text-green-100 text-lg leading-relaxed">
                     Kami telah mengirimkan tautan verifikasi ke email Anda. Silakan periksa inbox atau folder spam
                     dan klik tautan untuk mengaktifkan akun Anda.
                 </p>
@@ -51,7 +50,7 @@ new #[Layout('layouts.guest')] class extends Component
         <!-- Kanan: Konten & Tombol -->
         <div class="p-8 md:w-1/2 flex flex-col justify-center space-y-6 bg-white w-full md:max-w-md mx-auto">
             <div class="text-center">
-                <h2 class="text-2xl font-semibold text-blue-600">Konfirmasi Email</h2>
+                <h2 class="text-2xl font-semibold text-green-600">Konfirmasi Email</h2>
                 <p class="text-sm text-gray-500 mt-1">
                     Sebelum lanjut, verifikasi dulu alamat email kamu.
                 </p>
@@ -64,16 +63,41 @@ new #[Layout('layouts.guest')] class extends Component
             @endif
 
             <div class="flex flex-col gap-4 mt-6">
-                <x-primary-button
-                    wire:click="sendVerification"
-                    class="w-full justify-center py-3 rounded-xl text-base font-medium bg-blue-600 hover:bg-blue-700 transition-all duration-200">
-                    Kirim Tautan Verifikasi
+                <x-primary-button wire:click="sendVerification" wire:loading.attr="disabled"
+                    class="relative w-full justify-center py-3 rounded-xl text-base font-medium bg-green-600 hover:bg-green-700 transition-all duration-200">
+
+                    <!-- Normal State -->
+                    <span wire:loading.remove wire:target="sendVerification">
+                        Kirim Tautan Verifikasi
+                    </span>
+
+                    <!-- Loading State -->
+                    <span wire:loading wire:target="sendVerification" class="flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5 animate-spin" fill="none" stroke="white" viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10" stroke-width="4" class="opacity-25"></circle>
+                            <path stroke-width="4" d="M4 12a8 8 0 018-8" class="opacity-75"></path>
+                        </svg>
+                        Loading...
+                    </span>
                 </x-primary-button>
 
-                <button wire:click="logout"
-                    class="w-full justify-center py-3 rounded-xl text-base font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-all duration-200">
-                    Keluar
+                <button wire:click="logout" wire:loading.attr="disabled"
+                    class="relative w-full justify-center py-3 rounded-xl text-base font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-all duration-200">
+
+                    <!-- Normal -->
+                    <span wire:loading.remove wire:target="logout">
+                        Keluar
+                    </span>
+
+                    <!-- Loading -->
+                    <span wire:loading wire:target="logout" class="flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5 animate-spin" fill="none" stroke="gray" viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10" stroke-width="4" class="opacity-25"></circle>
+                            <path stroke-width="4" d="M4 12a8 8 0 018-8" class="opacity-75"></path>
+                        </svg>
+                    </span>
                 </button>
+
             </div>
 
             <p class="text-center text-sm text-gray-500 mt-6">

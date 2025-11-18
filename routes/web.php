@@ -13,10 +13,10 @@ use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 
-// Halaman utama diarahkan ke login
-Route::redirect('/', '/login');
 
 
 // Google Login
@@ -25,38 +25,57 @@ Route::get('/auth/google/redirect', function () {
         ->with(['prompt' => 'select_account'])
         ->redirect();
 });
- 
 
-Route::get('/auth/google/callback', function () {
-    $googleUser = Socialite::driver('google')->user();
+// Google Login
+Route::get('/auth/google/redirect', function () {
+    return Socialite::driver('google')
+        ->with(['prompt' => 'select_account'])
+        ->redirect();
+});
 
-    // Cari user berdasarkan email
+
+Route::get('/auth/google/callback', function (Request $request) {
+
+    if (!$request->has('code')) {
+        return redirect('/login')->with('error', 'Login Google dibatalkan.');
+    }
+
+    $googleUser = Socialite::driver('google')
+        ->stateless()
+        ->user();
+
     $user = User::where('email', $googleUser->email)->first();
 
     if ($user) {
-        // Jika user sudah ada → update data google_id & token
         $user->update([
             'google_id' => $googleUser->id,
             'google_token' => $googleUser->token,
             'google_refresh_token' => $googleUser->refreshToken,
         ]);
+
+        // 🔥 Jadikan VERIFIED
+        if (!$user->hasVerifiedEmail()) {
+            $user->markEmailAsVerified();
+        }
     } else {
-        // Jika belum ada → buat user baru
         $user = User::create([
             'google_id' => $googleUser->id,
             'email' => $googleUser->email,
             'name' => $googleUser->name,
             'google_token' => $googleUser->token,
             'google_refresh_token' => $googleUser->refreshToken,
-            'password' => Hash::make('password'),
+            'password' => Hash::make(Str::random(32)),
         ]);
+
+        // 🔥 Barusan dibuat → auto VERIFIED
+        $user->markEmailAsVerified();
     }
 
-    // Login user
     Auth::login($user);
 
     return redirect()->route('dashboard');
 });
+
 
 
 // Semua halaman di bawah hanya bisa diakses oleh user login

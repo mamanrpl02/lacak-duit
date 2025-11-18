@@ -30,32 +30,40 @@ new #[Layout('layouts.guest')] class extends Component {
 };
 ?>
 
-<div class="min-h-screen flex items-center justify-center bg-green-50 p-4 sm:p-6">
-    <div
-        class="bg-white shadow-lg rounded-2xl overflow-hidden w-full max-w-lg sm:max-w-2xl md:max-w-5xl flex flex-col md:flex-row">
-
-        <!-- Sisi Kiri - Gambar + Overlay -->
-        <div class="hidden md:flex relative w-1/2 bg-cover bg-center"
-            style="background-image: url('https://images.pexels.com/photos/887751/pexels-photo-887751.jpeg');">
-            <div class="absolute inset-0 bg-green-900/60"></div>
-            <div class="relative z-10 flex flex-col justify-center text-white p-10">
-                <h1 class="text-3xl font-bold mb-4">Buat Akun Baru ðŸš€</h1>
-                <p class="text-green-100 text-lg leading-relaxed">
-                    Daftar sekarang dan mulai kelola keuanganmu lebih rapi dan efisien!
-                </p>
-            </div>
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-green-100 p-6">
+    <div class="bg-white shadow-lg rounded-2xl overflow-hidden w-full max-w-5xl flex flex-col md:flex-row">
+        <!-- Sisi Kiri - Deskripsi -->
+        <div class="bg-gradient-to-br from-green-600 to-green-500 text-white p-10 md:w-1/2 flex flex-col justify-center">
+            <h1 class="text-3xl font-bold mb-4">Buat Akun Baru 🚀</h1>
+            <p class="text-green-100 text-lg leading-relaxed">
+                Daftar sekarang dan mulai catat keuanganmu dengan mudah.
+                Pantau pemasukan, pengeluaran, dan kelola tabungan di satu tempat!
+            </p>
         </div>
 
         <!-- Sisi Kanan - Form Register -->
-        <div class="p-6 sm:p-8 md:w-1/2 flex flex-col justify-center space-y-6 bg-white w-full">
+        <div class="p-8 md:w-1/2 flex flex-col justify-center space-y-6">
             <div class="text-center">
                 <h2 class="text-2xl font-semibold text-green-600">Daftar Akun</h2>
-                <p class="text-sm text-gray-500 mt-1">Isi data berikut untuk membuat akun baru</p>
+                <p class="text-sm text-gray-500 mt-1">Isi data dengan benar untuk membuat akun baru</p>
             </div>
 
             <a href="/auth/google/redirect"
-                class="w-full flex items-center justify-center gap-x-3 py-3 px-4 text-sm font-medium rounded-xl border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200">
-                <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5" alt="Google">
+                class="w-full flex items-center justify-center gap-x-3 py-3 px-4 text-sm font-medium rounded-xl border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200">
+                <svg class="w-5 h-auto" width="46" height="47" viewBox="0 0 46 47" fill="none">
+                    <path
+                        d="M46 24.0287C46 22.09 45.8533 20.68 45.5013 19.2112H23.4694V27.9356H36.4069C36.1429 30.1094 34.7347 33.37 31.5957 35.5731L31.5663 35.8669L38.5191 41.2719L38.9885 41.3306C43.4477 37.2181 46 31.1669 46 24.0287Z"
+                        fill="#4285F4" />
+                    <path
+                        d="M23.4694 47C29.8061 47 35.1161 44.9144 39.0179 41.3012L31.625 35.5437C29.6301 36.9244 26.9898 37.8937 23.4987 37.8937C17.2793 37.8937 12.0281 33.7812 10.1505 28.1412L9.88649 28.1706L2.61097 33.7812L2.52296 34.0456C6.36608 41.7125 14.287 47 23.4694 47Z"
+                        fill="#34A853" />
+                    <path
+                        d="M10.1212 28.1413C9.62245 26.6725 9.32908 25.1156 9.32908 23.5C9.32908 21.8844 9.62245 20.3275 10.0918 18.8588V18.5356L2.75765 12.8369L2.52296 12.9544C0.909439 16.1269 0 19.7106 0 23.5C0 27.2894 0.909439 30.8731 2.49362 34.0456L10.1212 28.1413Z"
+                        fill="#FBBC05" />
+                    <path
+                        d="M23.4694 9.07688C27.8699 9.07688 30.8622 10.9863 32.5344 12.5725L39.1645 6.11C35.0867 2.32063 29.8061 0 23.4694 0C14.287 0 6.36607 5.2875 2.49362 12.9544L10.0918 18.8588C11.9987 13.1894 17.25 9.07688 23.4694 9.07688Z"
+                        fill="#EB4335" />
+                </svg>
                 Daftar dengan Google
             </a>
 
@@ -70,38 +78,53 @@ new #[Layout('layouts.guest')] class extends Component {
                     <x-input-label for="name" value="Nama Lengkap" />
                     <x-text-input wire:model="name" id="name" type="text"
                         class="block w-full mt-2 rounded-xl border-gray-300 focus:border-green-500 focus:ring-green-500"
-                        required />
+                        required autofocus autocomplete="name" />
+                    <x-input-error :messages="$errors->get('name')" class="mt-2" />
                 </div>
 
                 <div>
                     <x-input-label for="email" value="Email" />
                     <x-text-input wire:model="email" id="email" type="email"
                         class="block w-full mt-2 rounded-xl border-gray-300 focus:border-green-500 focus:ring-green-500"
-                        required />
+                        required autocomplete="username" />
+                    <x-input-error :messages="$errors->get('email')" class="mt-2" />
                 </div>
 
-                <div class="relative">
+                <div>
                     <x-input-label for="password" value="Kata Sandi" />
                     <x-text-input wire:model="password" id="password" type="password"
-                        class="block w-full mt-2 rounded-xl border-gray-300 focus:border-green-500 focus:ring-green-500 pr-10"
-                        required />
-                    <button type="button" id="togglePasswordReg"
-                        class="absolute right-3 top-10 text-gray-500 hover:text-green-600">
-                        <i class="bi bi-eye"></i>
-                    </button>
+                        class="block w-full mt-2 rounded-xl border-gray-300 focus:border-green-500 focus:ring-green-500"
+                        required autocomplete="new-password" />
+                    <x-input-error :messages="$errors->get('password')" class="mt-2" />
                 </div>
 
                 <div>
                     <x-input-label for="password_confirmation" value="Konfirmasi Kata Sandi" />
                     <x-text-input wire:model="password_confirmation" id="password_confirmation" type="password"
                         class="block w-full mt-2 rounded-xl border-gray-300 focus:border-green-500 focus:ring-green-500"
-                        required />
+                        required autocomplete="new-password" />
+                    <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
                 </div>
 
-                <x-primary-button
-                    class="w-full justify-center py-3 rounded-xl text-base font-medium mt-3 bg-green-600 hover:bg-green-700">
-                    Daftar Sekarang
-                </x-primary-button>
+                <button type="submit"
+                    class="w-full justify-center py-3 rounded-xl text-base font-medium mt-3 bg-green-600 hover:bg-green-700 text-white flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed transition"
+                    wire:loading.class="opacity-70 cursor-wait" wire:target="register" wire:loading.attr="disabled">
+                    <!-- Normal text -->
+                    <span wire:loading.remove wire:target="register">
+                        Daftar Sekarang
+                    </span>
+
+                    <!-- Loading spinner -->
+                    <span wire:loading wire:target="register" class="flex items-center gap-2">
+                        <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
+                            viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                        </svg>
+                    </span>
+                </button>
+
             </form>
 
             <p class="text-center text-sm text-gray-500 mt-6">
@@ -113,11 +136,3 @@ new #[Layout('layouts.guest')] class extends Component {
         </div>
     </div>
 </div>
-
-
-<script>
-    document.getElementById('togglePasswordReg').addEventListener('click', function() {
-        const input = document.getElementById('password');
-        input.type = input.type === 'password' ? 'text' : 'password';
-    });
-</script>

@@ -33,12 +33,15 @@ new #[Layout('layouts.guest')] class extends Component {
 <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-green-100 p-6">
     <div class="bg-white shadow-lg rounded-2xl overflow-hidden w-full max-w-5xl flex flex-col md:flex-row">
         <!-- Sisi Kiri - Deskripsi -->
-        <div class="bg-gradient-to-br from-green-600 to-green-500 text-white p-10 md:w-1/2 flex flex-col justify-center">
-            <h1 class="text-3xl font-bold mb-4">Buat Akun Baru 🚀</h1>
-            <p class="text-green-100 text-lg leading-relaxed">
-                Daftar sekarang dan mulai catat keuanganmu dengan mudah.
-                Pantau pemasukan, pengeluaran, dan kelola tabungan di satu tempat!
-            </p>
+        <div class="hidden md:flex relative w-1/2 bg-cover bg-center"
+            style="background-image: url('https://images.pexels.com/photos/8052293/pexels-photo-8052293.jpeg');">
+            <div class="absolute inset-0 bg-gray-900/60"></div>
+            <div class="relative z-10 flex flex-col justify-center text-white p-10">
+                <h1 class="text-3xl font-bold mb-4">Selamat Datang Kembali 👋</h1>
+                <p class="text-green-100 text-lg leading-relaxed">
+                    Masuk ke akunmu untuk mengelola dan memantau keuangan dengan mudah.
+                </p>
+            </div>
         </div>
 
         <!-- Sisi Kanan - Form Register -->
@@ -90,21 +93,50 @@ new #[Layout('layouts.guest')] class extends Component {
                     <x-input-error :messages="$errors->get('email')" class="mt-2" />
                 </div>
 
-                <div>
+                <div x-data="{ show: false }">
                     <x-input-label for="password" value="Kata Sandi" />
-                    <x-text-input wire:model="password" id="password" type="password"
-                        class="block w-full mt-2 rounded-xl border-gray-300 focus:border-green-500 focus:ring-green-500"
-                        required autocomplete="new-password" />
+
+                    <div class="relative">
+                        <input :type="show ? 'text' : 'password'" wire:model="password" id="password"
+                            class="block w-full mt-2 rounded-xl border-gray-300 focus:border-green-500 focus:ring-green-500 pr-10"
+                            required autocomplete="new-password">
+
+                        <!-- Tombol mata -->
+                        <button type="button" @click="show = !show"
+                            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-green-600">
+
+                            <!-- Icon saat hidden -->
+                            <i x-show="!show" class="bi bi-eye text-xl"></i>
+
+                            <!-- Icon saat visible -->
+                            <i x-show="show" class="bi bi-eye-slash text-xl"></i>
+                        </button>
+                    </div>
+
                     <x-input-error :messages="$errors->get('password')" class="mt-2" />
                 </div>
 
-                <div>
+                <div x-data="{ show: false }">
                     <x-input-label for="password_confirmation" value="Konfirmasi Kata Sandi" />
-                    <x-text-input wire:model="password_confirmation" id="password_confirmation" type="password"
-                        class="block w-full mt-2 rounded-xl border-gray-300 focus:border-green-500 focus:ring-green-500"
-                        required autocomplete="new-password" />
+
+                    <div class="relative">
+                        <input :type="show ? 'text' : 'password'" wire:model="password_confirmation"
+                            id="password_confirmation"
+                            class="block w-full mt-2 rounded-xl border-gray-300 focus:border-green-500 focus:ring-green-500 pr-10"
+                            required autocomplete="new-password">
+
+                        <button type="button" @click="show = !show"
+                            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-green-600">
+
+                            <i x-show="!show" class="bi bi-eye text-xl"></i>
+                            <i x-show="show" class="bi bi-eye-slash text-xl"></i>
+
+                        </button>
+                    </div>
+
                     <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
                 </div>
+
 
                 <button type="submit"
                     class="w-full justify-center py-3 rounded-xl text-base font-medium mt-3 bg-green-600 hover:bg-green-700 text-white flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed transition"

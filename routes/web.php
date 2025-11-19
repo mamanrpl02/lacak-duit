@@ -17,15 +17,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 
-
-
-// Google Login
-Route::get('/auth/google/redirect', function () {
-    return Socialite::driver('google')
-        ->with(['prompt' => 'select_account'])
-        ->redirect();
-});
-
 // Google Login
 Route::get('/auth/google/redirect', function () {
     return Socialite::driver('google')

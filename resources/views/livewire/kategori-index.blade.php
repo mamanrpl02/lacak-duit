@@ -32,7 +32,7 @@
                 </div>
 
                 <!-- Responsive Table -->
-                <div class="overflow-x-auto border rounded-lg">
+                <div class="hidden md:block overflow-x-auto border rounded-lg">
                     <table class="min-w-full text-sm text-left text-gray-700">
                         <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
                             <tr>
@@ -85,6 +85,49 @@
                         </tbody>
                     </table>
                 </div>
+
+                <!-- ✅ Card View untuk Mobile -->
+                <div class="block md:hidden space-y-3 mt-4">
+                    @forelse ($kategoris as $k)
+                        <div class="border rounded-xl shadow-sm p-4 bg-gray-50">
+
+                            <!-- Header -->
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-semibold text-gray-800">{{ $k->nama_kategori }}</h4>
+                                    <p class="text-sm text-gray-600">Tipe: {{ $k->type }}</p>
+                                </div>
+
+                                @if ($k->gambar_icon)
+                                    <img src="{{ asset('storage/' . $k->gambar_icon) }}"
+                                        class="w-10 h-10 rounded object-cover border">
+                                @else
+                                    <span class="text-gray-400 text-sm">Tidak ada icon</span>
+                                @endif
+                            </div>
+
+                            <!-- Keterangan -->
+                            <p class="mt-2 text-sm text-gray-700">
+                                {{ $k->keterangan ?? '-' }}
+                            </p>
+
+                            <!-- Aksi -->
+                            <div class="mt-3 flex justify-end gap-2">
+                                <button wire:click="edit({{ $k->id }})"
+                                    class="px-3 py-1 bg-sky-500 text-white rounded-lg hover:bg-sky-600 text-xs">
+                                    Edit
+                                </button>
+                                <button onclick="confirmDelete({{ $k->id }})"
+                                    class="px-3 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600 text-xs">
+                                    Hapus
+                                </button>
+                            </div>
+                        </div>
+                    @empty
+                        <p class="text-center text-gray-500 py-4">Belum ada kategori.</p>
+                    @endforelse
+                </div>
+
 
                 <!-- Pagination -->
                 <div class="mt-4">

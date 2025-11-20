@@ -3,7 +3,8 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    {{-- <meta name="viewport" content="width=device-width, initial-scale=1"> --}}
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>{{ config('app.name', 'Laravel') }}</title>
@@ -25,6 +26,9 @@
             transition: all 0.3s ease-in-out;
         }
     </style>
+
+    <link rel="icon" href="{{ asset('assets/image/logo-noname.png') }}">
+
 
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
@@ -319,7 +323,7 @@
         <div>
             <!-- Logo -->
             <div class="flex align-middle items-center gap-2 mb-8">
-                <img class="w-8" src="{{ asset('assets/images/logo-noname.png') }}" alt="Logo">
+                <img class="w-8" src="{{ asset('assets/image/logo-noname.png') }}" alt="Logo">
                 <h1 id="logoText" class="text-lg font-semibold transition-all">Lacak Duit</h1>
             </div>
 
@@ -397,14 +401,14 @@
                 </button>
 
                 <!-- Search -->
-                <div class="relative">
+                {{-- <div class="relative">
                     <input type="text" placeholder="Cari sesuatu..."
                         class="border rounded-lg pl-10 pr-4 py-2 text-sm w-64 focus:ring-2 focus:ring-blue-500 focus:outline-none transition" />
                     <svg class="w-5 h-5 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor"
                         stroke-width="2" viewBox="0 0 24 24">
                         <path d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1010.5 18a7.5 7.5 0 006.15-3.35z" />
                     </svg>
-                </div>
+                </div> --}}
             </div>
 
             <!-- Profile -->
